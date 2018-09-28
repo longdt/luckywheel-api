@@ -1,0 +1,13 @@
+appName: Bond-Api
+httpPort: 8080
+httpHost: https://longdt.foxpify.com
+appKey: 6c1a338b2a7047c9771aa2a3d19ed587
+appSecret: 389af99afbe007fd6d6c3c43457b718a
+
+
+datasource:
+  host: localhost
+  port: 5432
+  database: luckywheel
+  username: postgres
+  password: foxpify

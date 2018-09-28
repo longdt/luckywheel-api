@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<!-- saved from url=(0071)https://d2i6wrs6r7tn21.cloudfront.net/sources/12/iframe.1528254722.html -->
+<html lang="vi">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta content="IE=edge" http-equiv="X-UA-Compatible">
+    <meta content="width=device-width, initial-scale=1" name="viewport">
+    <meta content="noindex,nofollow" name="robots">
+    <title>Spin To Win by Foxpify</title>
+    <link href="./lucky_wheel_files/spinner.1528254722.css" rel="stylesheet">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+
+    <script
+            src="lucky_wheel_files/lucky_wheel.js"></script>
+</head>
+<body>
+<div class="wrapper">
+    <div class="container" id="container">
+        <a class="closeButton" href="https://d2i6wrs6r7tn21.cloudfront.net/sources/12/javascript;"><i class="fa fa-times"></i></a>
+        <canvas height="1" id="confetti" width="1"></canvas>
+        <div id="brandmark"><span class="brandmark-text"><i class="fa fa-paper-plane"></i> Powered by </span><a class="brandmark-link" href="https://apps.shopify.com/spin-to-win-by-secomapp" target="_blank">Secomapp</a></div>
+        <div class="signup">
+            <h1 class="heading">Win an exclusive prize!</h1>
+            <p class="description">Enter your full name and email to spin the wheel for a chance to win</p>
+            <span><input autofocus="" class="fullname" name="fullname" placeholder=" Fullname " required="" tabindex="1"></span><span><input autocomplete="email" class="email" name="email" placeholder=" Email " required="" tabindex="2" type="email" value=""></span>
+            <p class="consent"> Consent </p>
+            <div class="gdpr-privacy"> Detailed information on the processing of personal data can be found in the <a href="https://d2i6wrs6r7tn21.cloudfront.net/sources/12/iframe.1528254722.html#link_to_policy_page" target="_blank">privacy policy</a>. In addition, you will find them in the message confirming the subscription to the newsletter. </div>
+            <div class="form-group gdpr-checkbox"><span class="gdpr-checkbox-container"><input class="checkbox" id="gdpr-checkbox" name="is_accept" type="checkbox" value="1"><label></label></span><label class="gdpr-accept-text" for="gdpr-checkbox">I agree to my personal data being stored and used to receive the newsletter</label></div>
+            <div class="action-group"><button class="spin" tabindex="3" onclick="myFunction()">Try your win!</button><br><a class="close" href="javascript:" id="no-button"> No thanks and don't show this again </a><button class="hidden-trigger"></button></div>
+        </div>
+        <div class="winContainer">
+            <h1 class="heading">You won <span class="win_text"></span></h1>
+            <p class="description">Don't forget to copy your coupon code before closing.</p>
+            <span class="prize"><input class="coupon" id="coupon" readonly="" title="Coupon"></span>
+            <div class="prize"><button class="copy-button" data-clipboard-action="copy" data-clipboard-target="#coupon" data-placement="bottom" id="copy" title="Coupon copied to clipboard."><i aria-hidden="true" class="fa fa-clipboard"></i> Copy </button><button class="close" id="close-button"><i aria-hidden="true" class="fa fa-times-circle-o"></i> Close </button></div>
+        </div>
+        <div class="wheelContainer">
+            <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" class="wheelSVG" text-rendering="optimizeSpeed" version="1.1" viewBox="0 0 1024 768" style="visibility: visible; top: 50%; left: 50%; transform: translate(-50%, -50%) matrix(0.57358, 0.81915, -0.81915, 0.57358, 0, 0);">
+                <defs>
+                    <filter height="550%" id="wheelShadowCutom" width="550%" x="-100%" y="-100%">
+                        <fegaussianblur in="SourceAlpha" stdDeviation="2.2"></fegaussianblur>
+                        <feoffset dx="12" dy="12" result="offsetblur"></feoffset>
+                        <feflood flood-color="rgba(0,0,0,0.5)"></feflood>
+                        <fecomposite in2="offsetblur" operator="in"></fecomposite>
+                        <femerge>
+                            <femergenode></femergenode>
+                            <femergenode in="SourceGraphic"></femergenode>
+                        </femerge>
+                    </filter>
+                    <filter height="550%" id="shadow" width="550%" x="-100%" y="-100%">
+                        <feoffset dx="0" dy="0" in="SourceAlpha" result="offsetOut"></feoffset>
+                        <fegaussianblur in="offsetOut" result="drop" stdDeviation="9"></fegaussianblur>
+                        <fecolormatrix in="drop" result="color-out" type="matrix" values="0 0 0 0   0
+                           0 0 0 0   0
+                           0 0 0 0   0
+                           0 0 0 .3 0"></fecolormatrix>
+                        <feblend in="SourceGraphic" in2="color-out" mode="normal"></feblend>
+                    </filter>
+                </defs>
+                <g class="mainContainer" data-svg-origin="512 384" style="transform-origin: 0px 0px 0px; transform: matrix(0, -1, 1, 0, 128, 896);">
+                    <g class="wheel" data-svg-origin="512 384" style="transform-origin: 0px 0px 0px; transform: matrix(1, 0, 0, 1, 0, 0);">
+                        <g>
+                            <path data-svg-origin="512 384" d="M512,384  L998.9409363431187,225.78329888002693  A512,512 0 0,1 998.9409363431187,542.2167011199731z" fill="#6d0015" stroke="0" style="transform-origin: 0px 0px 0px; transform: matrix(1, 0, 0, 1, 0, 0);"></path>
+                        </g>
+                        <g>
+                            <path data-svg-origin="512 384" d="M512,384  L998.9409363431187,225.78329888002693  A512,512 0 0,1 998.9409363431187,542.2167011199731z" fill="#be2f4e" stroke="0" style="transform-origin: 0px 0px 0px; transform: matrix(0.80901, 0.58778, -0.58778, 0.80901, 323.493, -227.609);"></path>
+                        </g>
+                        <g>
+                            <path data-svg-origin="512 384" d="M512,384  L998.9409363431187,225.78329888002693  A512,512 0 0,1 998.9409363431187,542.2167011199731z" fill="#e68198" stroke="0" style="transform-origin: 0px 0px 0px; transform: matrix(0.30901, 0.95105, -0.95105, 0.30901, 718.989, -221.603);"></path>
+                        </g>
+                        <g>
+                            <path data-svg-origin="512 384" d="M512,384  L998.9409363431187,225.78329888002693  A512,512 0 0,1 998.9409363431187,542.2167011199731z" fill="#facbd5" stroke="0" style="transform-origin: 0px 0px 0px; transform: matrix(-0.30901, 0.95105, -0.95105, -0.30901, 1035.42, 15.7216);"></path>
+                        </g>
+                        <g>
+                            <path data-svg-origin="512 384" d="M512,384  L998.9409363431187,225.78329888002693  A512,512 0 0,1 998.9409363431187,542.2167011199731z" fill="#6d0015" stroke="0" style="transform-origin: 0px 0px 0px; transform: matrix(-0.80901, 0.58778, -0.58778, -0.80901, 1151.93, 393.716);"></path>
+                        </g>
+                        <g>
+                            <path data-svg-origin="512 384" d="M512,384  L998.9409363431187,225.78329888002693  A512,512 0 0,1 998.9409363431187,542.2167011199731z" fill="#be2f4e" stroke="0" style="transform-origin: 0px 0px 0px; transform: matrix(-1, 0, 0, -1, 1024, 768);"></path>
+                        </g>
+                        <g>
+                            <path data-svg-origin="512 384" d="M512,384  L998.9409363431187,225.78329888002693  A512,512 0 0,1 998.9409363431187,542.2167011199731z" fill="#e68198" stroke="0" style="transform-origin: 0px 0px 0px; transform: matrix(-0.80901, -0.58778, 0.58778, -0.80901, 700.507, 995.609);"></path>
+                        </g>
+                        <g>
+                            <path data-svg-origin="512 384" d="M512,384  L998.9409363431187,225.78329888002693  A512,512 0 0,1 998.9409363431187,542.2167011199731z" fill="#facbd5" stroke="0" style="transform-origin: 0px 0px 0px; transform: matrix(-0.30901, -0.95105, 0.95105, -0.30901, 305.011, 989.603);"></path>
+                        </g>
+                        <g>
+                            <path data-svg-origin="512 384" d="M512,384  L998.9409363431187,225.78329888002693  A512,512 0 0,1 998.9409363431187,542.2167011199731z" fill="#6d0015" stroke="0" style="transform-origin: 0px 0px 0px; transform: matrix(0.30901, -0.95105, 0.95105, 0.30901, -11.4224, 752.278);"></path>
+                        </g>
+                        <g>
+                            <path data-svg-origin="512 384" d="M512,384  L998.9409363431187,225.78329888002693  A512,512 0 0,1 998.9409363431187,542.2167011199731z" fill="#be2f4e" stroke="0" style="transform-origin: 0px 0px 0px; transform: matrix(0.80901, -0.58778, 0.58778, 0.80901, -127.926, 374.284);"></path>
+                        </g>
+                    </g>
+                </g>
+                <g class="centerCircle" filter="url(#shadow)">
+                    <circle fill="#FFFFFF" stroke="#FFFFFF" stroke-width="12" cx="512" cy="384" r="110"></circle>
+                </g>
+                <g class="wheelOutline" filter="url(#wheelShadowCutom)">
+                    <g>
+                        <circle fill="transparent" stroke="#FFFFFF" stroke-width="30" cx="512" cy="384" r="512"></circle>
+                        <circle cx="338.33244916127944" cy="-150.4937621578763" fill="#ffffff" stroke="#ffffff" stroke-width="0.25" stroke-linecap="round" r="10"></circle>
+                        <line x1="353.78329888002685" y1="-102.94093634311861" x2="338.33244916127944" y2="-150.4937621578763" stroke="#ffffff" stroke-width="20"></line>
+                        <circle cx="353.78329888002685" cy="-102.94093634311861" fill="#6d0015" stroke="#6d0015" stroke-width="0.25" stroke-linecap="round" r="10"></circle>
+                        <circle cx="685.6675508387203" cy="-150.4937621578763" fill="#ffffff" stroke="#ffffff" stroke-width="0.25" stroke-linecap="round" r="10"></circle>
+                        <line x1="670.216701119973" y1="-102.94093634311866" x2="685.6675508387203" y2="-150.4937621578763" stroke="#ffffff" stroke-width="20"></line>
+                        <circle cx="670.216701119973" cy="-102.94093634311866" fill="#6d0015" stroke="#6d0015" stroke-width="0.25" stroke-linecap="round" r="10"></circle>
+                        <circle cx="966.6675508387204" cy="53.66468821162999" fill="#ffffff" stroke="#ffffff" stroke-width="0.25" stroke-linecap="round" r="10"></circle>
+                        <line x1="926.2167011199731" y1="83.05395082625364" x2="966.6675508387204" y2="53.66468821162999" stroke="#ffffff" stroke-width="20"></line>
+                        <circle cx="926.2167011199731" cy="83.05395082625364" fill="#6d0015" stroke="#6d0015" stroke-width="0.25" stroke-linecap="round" r="10"></circle>
+                        <circle cx="1074" cy="383.9999999999999" fill="#ffffff" stroke="#ffffff" stroke-width="0.25" stroke-linecap="round" r="10"></circle>
+                        <line x1="1024" y1="383.9999999999999" x2="1074" y2="383.9999999999999" stroke="#ffffff" stroke-width="20"></line>
+                        <circle cx="1024" cy="383.9999999999999" fill="#6d0015" stroke="#6d0015" stroke-width="0.25" stroke-linecap="round" r="10"></circle>
+                        <circle cx="966.6675508387206" cy="714.3353117883698" fill="#ffffff" stroke="#ffffff" stroke-width="0.25" stroke-linecap="round" r="10"></circle>
+                        <line x1="926.2167011199731" y1="684.9460491737461" x2="966.6675508387206" y2="714.3353117883698" stroke="#ffffff" stroke-width="20"></line>
+                        <circle cx="926.2167011199731" cy="684.9460491737461" fill="#6d0015" stroke="#6d0015" stroke-width="0.25" stroke-linecap="round" r="10"></circle>
+                        <circle cx="685.6675508387207" cy="918.4937621578763" fill="#ffffff" stroke="#ffffff" stroke-width="0.25" stroke-linecap="round" r="10"></circle>
+                        <line x1="670.2167011199732" y1="870.9409363431187" x2="685.6675508387207" y2="918.4937621578763" stroke="#ffffff" stroke-width="20"></line>
+                        <circle cx="670.2167011199732" cy="870.9409363431187" fill="#6d0015" stroke="#6d0015" stroke-width="0.25" stroke-linecap="round" r="10"></circle>
+                        <circle cx="338.3324491612797" cy="918.4937621578763" fill="#ffffff" stroke="#ffffff" stroke-width="0.25" stroke-linecap="round" r="10"></circle>
+                        <line x1="353.7832988800271" y1="870.9409363431187" x2="338.3324491612797" y2="918.4937621578763" stroke="#ffffff" stroke-width="20"></line>
+                        <circle cx="353.7832988800271" cy="870.9409363431187" fill="#6d0015" stroke="#6d0015" stroke-width="0.25" stroke-linecap="round" r="10"></circle>
+                        <circle cx="57.33244916127967" cy="714.3353117883701" fill="#ffffff" stroke="#ffffff" stroke-width="0.25" stroke-linecap="round" r="10"></circle>
+                        <line x1="97.78329888002702" y1="684.9460491737464" x2="57.33244916127967" y2="714.3353117883701" stroke="#ffffff" stroke-width="20"></line>
+                        <circle cx="97.78329888002702" cy="684.9460491737464" fill="#6d0015" stroke="#6d0015" stroke-width="0.25" stroke-linecap="round" r="10"></circle>
+                        <circle cx="-50" cy="384.0000000000002" fill="#ffffff" stroke="#ffffff" stroke-width="0.25" stroke-linecap="round" r="10"></circle>
+                        <line x1="0" y1="384.00000000000017" x2="-50" y2="384.0000000000002" stroke="#ffffff" stroke-width="20"></line>
+                        <circle cx="0" cy="384.00000000000017" fill="#6d0015" stroke="#6d0015" stroke-width="0.25" stroke-linecap="round" r="10"></circle>
+                        <circle cx="57.332449161279385" cy="53.66468821163028" fill="#ffffff" stroke="#ffffff" stroke-width="0.25" stroke-linecap="round" r="10"></circle>
+                        <line x1="97.78329888002679" y1="83.05395082625392" x2="57.332449161279385" y2="53.66468821163028" stroke="#ffffff" stroke-width="20"></line>
+                        <circle cx="97.78329888002679" cy="83.05395082625392" fill="#6d0015" stroke="#6d0015" stroke-width="0.25" stroke-linecap="round" r="10"></circle>
+                    </g>
+                </g>
+                <g class="pegContainer" filter="url(#shadow)" data-svg-origin="511.99995613098145 -93.36549377441406" style="transform-origin: 0px 0px 0px; transform: matrix(1.70666, 0, 0, 1.70666, -361.813, 65.9783);">
+                    <path class="peg" d="M22.139,0C5.623,0-1.523,15.572,0.269,27.037c3.392,21.707,21.87,42.232,21.87,42.232	s18.478-20.525,21.87-42.232C45.801,15.572,38.623,0,22.139,0z" fill="#EEEEEE" data-svg-origin="22.13857078552246 17.317249298095703" style="visibility: visible; transform-origin: 0px 0px 0px; transform: matrix(1, 0, 0, 1, 489.861, -162.634);"></path>
+                    <circle cx="509.8614025115967" cy="-142.6344985961914" fill="#6d0015" stroke="#6d0015" stroke-width="0.25" stroke-linecap="round" r="7" data-svg-origin="509.86138916015625 -146.13449096679688" style="visibility: visible; transform-origin: 0px 0px 0px; transform: matrix(1, 0, 0, 1, 0, 0);"></circle>
+                </g>
+                <g class="valueContainer" filter="url(#shadow)" data-svg-origin="512 384" style="transform-origin: 0px 0px 0px; transform: matrix(1, 0, 0, 1, 0, 0);">
+                    <g>
+                        <image class="wheelLogo" x="452" y="324" xlink:href="https://d2i6wrs6r7tn21.cloudfront.net/img/app_icon.png" width="120" height="120"></image>
+                    </g>
+                    <g data-svg-origin="512 384" style="transform-origin: 0px 0px 0px; transform: matrix(1, 0, 0, 1, 0, 0);">
+                        <text class="wheelText" fill="#FFFFFF" x="512" y="-68" transform="rotate(-90, 590, -2)" text-anchor="middle" style="font-size: 35px;">
+                            <tspan dy="0" x="512" text-anchor="middle">10% OFF</tspan>
+                        </text>
+                    </g>
+                    <g data-svg-origin="512 384" style="transform-origin: 0px 0px 0px; transform: matrix(0.80901, 0.58778, -0.58778, 0.80901, 323.493, -227.609);">
+                        <text class="wheelText" fill="#FFFFFF" x="512" y="-68" transform="rotate(-90, 590, -2)" text-anchor="middle" style="font-size: 35px;">
+                            <tspan dy="0" x="512" text-anchor="middle">No lucky today</tspan>
+                        </text>
+                    </g>
+                    <g data-svg-origin="512 384" style="transform-origin: 0px 0px 0px; transform: matrix(0.30901, 0.95105, -0.95105, 0.30901, 718.989, -221.603);">
+                        <text class="wheelText" fill="#FFFFFF" x="512" y="-68" transform="rotate(-90, 590, -2)" text-anchor="middle" style="font-size: 35px;">
+                            <tspan dy="0" x="512" text-anchor="middle">20% OFF</tspan>
+                        </text>
+                    </g>
+                    <g data-svg-origin="512 384" style="transform-origin: 0px 0px 0px; transform: matrix(-0.30901, 0.95105, -0.95105, -0.30901, 1035.42, 15.7216);">
+                        <text class="wheelText" fill="#FFFFFF" x="512" y="-68" transform="rotate(-90, 590, -2)" text-anchor="middle" style="font-size: 35px;">
+                            <tspan dy="0" x="512" text-anchor="middle">Sorry!</tspan>
+                        </text>
+                    </g>
+                    <g data-svg-origin="512 384" style="transform-origin: 0px 0px 0px; transform: matrix(-0.80901, 0.58778, -0.58778, -0.80901, 1151.93, 393.716);">
+                        <text class="wheelText" fill="#FFFFFF" x="512" y="-68" transform="rotate(-90, 590, -2)" text-anchor="middle" style="font-size: 35px;">
+                            <tspan dy="0" x="512" text-anchor="middle">30% OFF</tspan>
+                        </text>
+                    </g>
+                    <g data-svg-origin="512 384" style="transform-origin: 0px 0px 0px; transform: matrix(-1, 0, 0, -1, 1024, 768);">
+                        <text class="wheelText" fill="#FFFFFF" x="512" y="-68" transform="rotate(-90, 590, -2)" text-anchor="middle" style="font-size: 35px;">
+                            <tspan dy="0" x="512" text-anchor="middle">So close!</tspan>
+                        </text>
+                    </g>
+                    <g data-svg-origin="512 384" style="transform-origin: 0px 0px 0px; transform: matrix(-0.80901, -0.58778, 0.58778, -0.80901, 700.507, 995.609);">
+                        <text class="wheelText" fill="#FFFFFF" x="512" y="-68" transform="rotate(-90, 590, -2)" text-anchor="middle" style="font-size: 35px;">
+                            <tspan dy="0" x="512" text-anchor="middle">40% OFF</tspan>
+                        </text>
+                    </g>
+                    <g data-svg-origin="512 384" style="transform-origin: 0px 0px 0px; transform: matrix(-0.30901, -0.95105, 0.95105, -0.30901, 305.011, 989.603);">
+                        <text class="wheelText" fill="#FFFFFF" x="512" y="-68" transform="rotate(-90, 590, -2)" text-anchor="middle" style="font-size: 35px;">
+                            <tspan dy="0" x="512" text-anchor="middle">Almost!</tspan>
+                        </text>
+                    </g>
+                    <g data-svg-origin="512 384" style="transform-origin: 0px 0px 0px; transform: matrix(0.30901, -0.95105, 0.95105, 0.30901, -11.4224, 752.278);">
+                        <text class="wheelText" fill="#FFFFFF" x="512" y="-68" transform="rotate(-90, 590, -2)" text-anchor="middle" style="font-size: 35px;">
+                            <tspan dy="0" x="512" text-anchor="middle">Free shipping</tspan>
+                        </text>
+                    </g>
+                    <g data-svg-origin="512 384" style="transform-origin: 0px 0px 0px; transform: matrix(0.80901, -0.58778, 0.58778, 0.80901, -127.926, 374.284);">
+                        <text class="wheelText" fill="#FFFFFF" x="512" y="-68" transform="rotate(-90, 590, -2)" text-anchor="middle" style="font-size: 35px;">
+                            <tspan dy="0" x="512" text-anchor="middle">Try next time!</tspan>
+                        </text>
+                    </g>
+                </g>
+            </svg>
+            <div class="toast" style="box-shadow: rgba(21, 21, 21, 0.5) 0px 0px 20px; top: 50%; left: 50%; transform: translate(-50%, -50%) matrix(1, 0, 0, 1, 0, 0); visibility: visible; background-color: rgb(232, 29, 98); opacity: 1;">
+                <p></p>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="./lucky_wheel_files/spinner.js"></script><script src="./lucky_wheel_files/spinner.1528254722.js"></script>
+</body>
+</html>
