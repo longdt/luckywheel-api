@@ -10,6 +10,12 @@ sourceCompatibility = 1.11
 
 repositories {
     mavenCentral()
+    maven {
+        url "http://artifactory.foxpify.com:8081/artifactory/libs-snapshot-local"
+    }
+    maven {
+        url "http://artifactory.foxpify.com:8081/artifactory/libs-release-local"
+    }
 }
 
 dependencies {
@@ -23,6 +29,9 @@ dependencies {
     compile 'io.vertx:vertx-mysql-postgresql-client:3.5.3'
     compile 'io.vertx:vertx-config:3.5.3'
     compile 'io.vertx:vertx-config-yaml:3.5.3'
+
+    compile 'com.foxpify:shopify-vertx-api:1.0-SNAPSHOT'
+    compile 'com.foxpify:vertx-orm:1.0-SNAPSHOT'
 
     compile 'com.github.ben-manes.caffeine:caffeine:2.6.2'
 
