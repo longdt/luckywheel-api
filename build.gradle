@@ -35,6 +35,9 @@ dependencies {
 
     compile 'com.github.ben-manes.caffeine:caffeine:2.6.2'
 
+    // https://mvnrepository.com/artifact/org.projectlombok/lombok
+    compile group: 'org.projectlombok', name: 'lombok', version: '1.18.2'
+
     compile group: 'com.google.dagger', name: 'dagger', version: '2.16'
     annotationProcessor 'com.google.dagger:dagger-compiler:2.16'
     testAnnotationProcessor 'com.google.dagger:dagger-compiler:2.16'
