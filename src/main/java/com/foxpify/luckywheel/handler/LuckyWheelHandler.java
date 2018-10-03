@@ -2,7 +2,6 @@ package com.foxpify.luckywheel.handler;
 
 import com.foxpify.luckywheel.conf.AppConf;
 import com.foxpify.luckywheel.exception.ErrorCode;
-import com.foxpify.luckywheel.exception.RequiredParametersMissingException;
 import com.foxpify.luckywheel.exception.ValidateException;
 import com.foxpify.luckywheel.model.entity.Slide;
 import com.foxpify.luckywheel.model.request.SpinRequest;
@@ -40,8 +39,19 @@ public class LuckyWheelHandler {
     }
 
     public void uninstall(RoutingContext routingContext) {
-        String hmac = routingContext.request().getHeader("HTTP_X_SHOPIFY_HMAC_SHA256");
-//        luckyWheelService.uninstall(hmac, )
+        String hmac = routingContext.request().getHeader("X-Shopify-Hmac-SHA256");
+        String shop = routingContext.request().getHeader("X-Shopify-Shop-Domain");
+        String topic = routingContext.request().getHeader("X-Shopify-Topic");
+        if ("app/uninstalled".equals(topic)) {
+            luckyWheelService.uninstall(shop, hmac, routingContext.getBody(), new ResponseHandler<>(routingContext) {
+                @Override
+                public void success(Void result) throws Throwable {
+                    Responses.ok(routingContext);
+                }
+            });
+        } else {
+            Responses.badRequest(routingContext);
+        }
     }
 
     public void auth(RoutingContext routingContext) {
@@ -62,6 +72,10 @@ public class LuckyWheelHandler {
                 Responses.ok(routingContext);
             }
         });
+    }
+
+    public void createWheel(RoutingContext routingContext) {
+
     }
 
     public void spinWheel(RoutingContext routingContext) {

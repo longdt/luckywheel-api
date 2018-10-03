@@ -17,6 +17,10 @@ public class Responses {
         routingContext.response().putHeader("Location", locationUrl).setStatusCode(307).end();
     }
 
+    public static void badRequest(RoutingContext routingContext) {
+        routingContext.response().setStatusCode(400).end();
+    }
+
     public static void badRequest(RoutingContext routingContext, Object response) {
         json(routingContext, 400, response);
     }

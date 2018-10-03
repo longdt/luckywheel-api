@@ -6,9 +6,8 @@ import com.foxpify.shopifyapi.model.User;
 import java.time.OffsetDateTime;
 
 public class ShopToken {
+    private Long id;
     private String shop;
-    private boolean permanentToken;
-    private String code;
     private String accessToken;
     private String scope;
     private Long expiresIn;
@@ -16,19 +15,26 @@ public class ShopToken {
     private User associatedUser;
     private OffsetDateTime createdAt;
     private OffsetDateTime updatedAt;
+    private boolean deleted;
 
     public ShopToken() {
     }
 
-    public ShopToken(String shop, String code, boolean permanentToken, OAuthToken authToken) {
+    public ShopToken(String shop, OAuthToken authToken) {
         this.shop = shop;
-        this.permanentToken = permanentToken;
-        this.code = code;
         this.accessToken = authToken.getAccessToken();
         this.scope = authToken.getScope();
         this.expiresIn = authToken.getExpiresIn();
         this.associatedUserScope = authToken.getAssociatedUserScope();
         this.associatedUser = authToken.getAssociatedUser();
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
     }
 
     public String getShop() {
@@ -37,22 +43,6 @@ public class ShopToken {
 
     public void setShop(String shop) {
         this.shop = shop;
-    }
-
-    public boolean isPermanentToken() {
-        return permanentToken;
-    }
-
-    public void setPermanentToken(boolean permanentToken) {
-        this.permanentToken = permanentToken;
-    }
-
-    public String getCode() {
-        return code;
-    }
-
-    public void setCode(String code) {
-        this.code = code;
     }
 
     public String getAccessToken() {
@@ -109,5 +99,13 @@ public class ShopToken {
 
     public void setUpdatedAt(OffsetDateTime updatedAt) {
         this.updatedAt = updatedAt;
+    }
+
+    public boolean isDeleted() {
+        return deleted;
+    }
+
+    public void setDeleted(boolean deleted) {
+        this.deleted = deleted;
     }
 }

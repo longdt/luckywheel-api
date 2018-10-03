@@ -4,6 +4,7 @@ import com.foxpify.luckywheel.exception.InvalidHmacException;
 import com.foxpify.luckywheel.exception.ShopTokenNotFoundException;
 import com.foxpify.luckywheel.model.entity.ShopToken;
 import com.foxpify.luckywheel.model.entity.Slide;
+import com.foxpify.luckywheel.model.entity.Wheel;
 import com.foxpify.luckywheel.model.request.SpinRequest;
 import com.foxpify.luckywheel.repository.ShopTokenRepository;
 import com.foxpify.luckywheel.repository.WheelRepository;
@@ -13,37 +14,46 @@ import com.foxpify.shopifyapi.client.ShopifyClient;
 import com.foxpify.shopifyapi.model.Asset;
 import com.foxpify.shopifyapi.model.Theme;
 import com.foxpify.shopifyapi.util.Futures;
+import com.foxpify.vertxorm.repository.query.Query;
 import com.github.benmanes.caffeine.cache.AsyncLoadingCache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.MultiMap;
+import io.vertx.core.buffer.Buffer;
 
 import java.time.OffsetDateTime;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 
+import static com.foxpify.vertxorm.repository.query.QueryFactory.and;
+import static com.foxpify.vertxorm.repository.query.QueryFactory.equal;
+
 public class LuckyWheelServiceImpl implements LuckyWheelService {
     private ShopifyClient shopifyClient;
     private ShopTokenRepository shopTokenRepository;
     private WheelRepository wheelRepository;
-    private AsyncLoadingCache<String, Session> sessionCache;
+    private AsyncLoadingCache<Long, ShopToken> tokenCache;
 
     public LuckyWheelServiceImpl(ShopifyClient shopifyClient, ShopTokenRepository shopTokenRepository, WheelRepository wheelRepository) {
         this.shopifyClient = shopifyClient;
         this.shopTokenRepository = shopTokenRepository;
         this.wheelRepository = wheelRepository;
-        sessionCache = Caffeine.newBuilder()
+        tokenCache = Caffeine.newBuilder()
                 .maximumSize(10_000)
                 .expireAfterAccess(10, TimeUnit.HOURS)
-                .buildAsync((key, executor) -> Futures.toCompletableFuture(shopTokenRepository.find(key).map(tokenOpt -> {
-                    ShopToken token = tokenOpt.orElseThrow(() -> new ShopTokenNotFoundException("shop: " + key));
-                    return shopifyClient.newSession(token.getShop(), token.getAccessToken());
-                })));
+                .buildAsync((tokenId, executor) -> Futures.toCompletableFuture(shopTokenRepository.querySingle(byTokenId(tokenId)).map(
+                        tokenOpt -> tokenOpt.orElseThrow(() -> new ShopTokenNotFoundException("tokenId: " + tokenId)))));
+    }
 
+    private Query<ShopToken> byShop(String shop) {
+        return and(equal("shop", shop), equal("deleted", false));
+    }
 
+    private Query<ShopToken> byTokenId(Long tokenId) {
+        return and(equal("id", tokenId), equal("deleted", false));
     }
 
     @Override
@@ -55,34 +65,52 @@ public class LuckyWheelServiceImpl implements LuckyWheelService {
     public void auth(String shop, String code, String hmac, MultiMap params, Handler<AsyncResult<Void>> resultHandler) {
         if (shopifyClient.verifyRequest(hmac, params)) {
             shopifyClient.requestToken(shop, code).compose(authToken -> {
-                        ShopToken token = new ShopToken(shop, code, true, authToken);
+                        ShopToken token = new ShopToken(shop, authToken);
                         OffsetDateTime now = OffsetDateTime.now();
                         token.setCreatedAt(now);
                         token.setUpdatedAt(now);
                         return shopTokenRepository.save(token);
                     }
             ).map(shopToken -> {
-                Session session = shopifyClient.newSession(shopToken.getShop(), shopToken.getAccessToken());
-                sessionCache.put(shopToken.getShop(), CompletableFuture.completedFuture(session));
-                return session;
-            }).compose(session -> createWheelGui(shop)).setHandler(resultHandler);
+                tokenCache.put(shopToken.getId(), CompletableFuture.completedFuture(shopToken));
+                return (Void) null;
+            }).setHandler(resultHandler);
         } else {
             throw new InvalidHmacException("HMAC validation failed");
         }
     }
 
     @Override
-    public void createWheelGui(String shop, Handler<AsyncResult<Void>> resultHandler) {
-        Futures.toFuture(sessionCache.get(shop))
+    public void uninstall(String shop, String hmac, Buffer body, Handler<AsyncResult<Void>> resultHandler) {
+        if (!shopifyClient.verifyData(hmac, body)) {
+            throw new InvalidHmacException("HMAC validation failed");
+        }
+        shopTokenRepository.querySingle(byShop(shop))
+                .map(tokenOpt -> tokenOpt.orElseThrow(() -> new ShopTokenNotFoundException("Can't uninstall shop " + shop)))
+                .compose(shopToken -> {
+                    shopToken.setDeleted(true);
+                    return shopTokenRepository.save(shopToken);
+                }).map(shopToken -> (Void) null).setHandler(resultHandler);
+    }
+
+    @Override
+    public void createWheelGui(Long tokenId, Handler<AsyncResult<Void>> resultHandler) {
+        Futures.toFuture(tokenCache.get(tokenId))
+                .map(t -> shopifyClient.newSession(t.getShop(), t.getAccessToken()))
                 .compose(session ->
-                    session.findThemes().map(themes -> themes.stream().filter(theme -> theme.getRole() == Theme.Role.MAIN).findFirst().orElse(null))
-                        .compose(theme -> session.findAsset(theme.getId(), "layout/theme.liquid"))
-                        .compose(asset -> updateAsset(session, asset))
-                        .map(asset -> (Void) null)
+                        session.findThemes().map(themes -> themes.stream().filter(theme -> theme.getRole() == Theme.Role.MAIN).findFirst().orElse(null))
+                                .compose(theme -> session.findAsset(theme.getId(), "layout/theme.liquid"))
+                                .compose(asset -> updateAsset(session, asset))
+                                .map(asset -> (Void) null)
                 ).setHandler(resultHandler);
     }
 
-    Future<Asset> updateAsset(Session session, Asset asset) {
+    @Override
+    public void createWheel(Long tokenId, Wheel wheel, Handler<AsyncResult<Wheel>> resultHandler) {
+
+    }
+
+    private Future<Asset> updateAsset(Session session, Asset asset) {
         String content = asset.getValue();
         if (content.contains("<div id=\"luckywheel-div\"")) {
             return Future.succeededFuture();

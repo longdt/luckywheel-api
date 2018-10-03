@@ -7,7 +7,7 @@ import java.util.UUID;
 @CompiledJson
 public class SpinRequest {
     private UUID wheelId;
-    private String fullname;
+    private String fullName;
     private String email;
 
     public UUID getWheelId() {
@@ -18,12 +18,12 @@ public class SpinRequest {
         this.wheelId = wheelId;
     }
 
-    public String getFullname() {
-        return fullname;
+    public String getFullName() {
+        return fullName;
     }
 
-    public void setFullname(String fullname) {
-        this.fullname = fullname;
+    public void setFullName(String fullName) {
+        this.fullName = fullName;
     }
 
     public String getEmail() {
