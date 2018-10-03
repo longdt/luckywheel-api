@@ -21,6 +21,10 @@ public class Responses {
         json(routingContext, 400, response);
     }
 
+    public static void forbidden(RoutingContext routingContext, Object response) {
+        json(routingContext, 403, response);
+    }
+
     public static void notFound(RoutingContext routingContext, Object response) {
         json(routingContext, 404, response);
     }

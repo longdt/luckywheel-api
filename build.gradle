@@ -31,7 +31,7 @@ dependencies {
     compile 'io.vertx:vertx-config-yaml:3.5.3'
 
     compile 'com.foxpify:shopify-vertx-api:1.0-SNAPSHOT'
-    compile 'com.foxpify:vertx-orm:1.0-SNAPSHOT'
+    compile 'com.foxpify:vertx-orm:1.0'
 
     compile 'com.github.ben-manes.caffeine:caffeine:2.6.2'
 

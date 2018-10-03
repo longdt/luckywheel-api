@@ -12,6 +12,7 @@ import io.vertx.core.http.HttpServer;
 import io.vertx.core.json.Json;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.handler.BodyHandler;
+import io.vertx.ext.web.handler.CookieHandler;
 import io.vertx.ext.web.handler.LoggerHandler;
 import io.vertx.ext.web.handler.StaticHandler;
 import org.apache.logging.log4j.LogManager;
@@ -36,6 +37,7 @@ public class LuckyWheelServer {
         AppComponent creator = DaggerAppComponent.builder().appModule(module).build();
         LuckyWheelHandler luckyWheelHandler = creator.createLuckyWheelHandler();
         router.route().handler(LoggerHandler.create());
+        router.route().handler(CookieHandler.create());
         router.route().handler(BodyHandler.create());
         router.get("/luckywheel/install").handler(luckyWheelHandler::install);
         router.get("/luckywheel/auth").handler(luckyWheelHandler::auth);

@@ -2,17 +2,19 @@ package com.foxpify.luckywheel.model.request;
 
 import com.dslplatform.json.CompiledJson;
 
+import java.util.UUID;
+
 @CompiledJson
 public class SpinRequest {
-    private Long wheelId;
+    private UUID wheelId;
     private String fullname;
     private String email;
 
-    public Long getWheelId() {
+    public UUID getWheelId() {
         return wheelId;
     }
 
-    public void setWheelId(Long wheelId) {
+    public void setWheelId(UUID wheelId) {
         this.wheelId = wheelId;
     }
 

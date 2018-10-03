@@ -2,9 +2,9 @@ package com.foxpify.luckywheel.conf;
 
 import com.foxpify.luckywheel.handler.LuckyWheelHandler;
 import com.foxpify.luckywheel.repository.ShopTokenRepository;
-import com.foxpify.luckywheel.repository.SlideRepository;
+import com.foxpify.luckywheel.repository.WheelRepository;
 import com.foxpify.luckywheel.repository.impl.ShopTokenRepositoryImpl;
-import com.foxpify.luckywheel.repository.impl.SlideRepositoryImpl;
+import com.foxpify.luckywheel.repository.impl.WheelRepositoryImpl;
 import com.foxpify.luckywheel.service.LuckyWheelService;
 import com.foxpify.luckywheel.service.impl.LuckyWheelServiceImpl;
 import com.foxpify.shopifyapi.client.ShopifyClient;
@@ -62,8 +62,8 @@ public class AppModule {
 
     @Singleton
     @Provides
-    LuckyWheelService provideLuckyWheelService(ShopifyClient shopifyClient, ShopTokenRepository shopTokenRepository, SlideRepository slideRepository) {
-        return new LuckyWheelServiceImpl(shopifyClient, shopTokenRepository, slideRepository);
+    LuckyWheelService provideLuckyWheelService(ShopifyClient shopifyClient, ShopTokenRepository shopTokenRepository, WheelRepository wheelRepository) {
+        return new LuckyWheelServiceImpl(shopifyClient, shopTokenRepository, wheelRepository);
     }
 
     @Singleton
@@ -74,8 +74,8 @@ public class AppModule {
 
     @Singleton
     @Provides
-    SlideRepository provideSlideRepository(SQLClient sqlClient) {
-        return new SlideRepositoryImpl(sqlClient);
+    WheelRepository provideSlideRepository(SQLClient sqlClient) {
+        return new WheelRepositoryImpl(sqlClient);
     }
 
     @Singleton

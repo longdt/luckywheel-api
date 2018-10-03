@@ -6,8 +6,8 @@ appSecret: 389af99afbe007fd6d6c3c43457b718a
 
 
 datasource:
-  host: localhost
+  host: postgres.db.foxpify.com
   port: 5432
   database: luckywheel
-  username: postgres
-  password: foxpify
+  username: foxpify
+  password: ntIVEnDOwLsT

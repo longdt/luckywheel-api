@@ -6,7 +6,7 @@ import com.foxpify.luckywheel.model.entity.ShopToken;
 import com.foxpify.luckywheel.model.entity.Slide;
 import com.foxpify.luckywheel.model.request.SpinRequest;
 import com.foxpify.luckywheel.repository.ShopTokenRepository;
-import com.foxpify.luckywheel.repository.SlideRepository;
+import com.foxpify.luckywheel.repository.WheelRepository;
 import com.foxpify.luckywheel.service.LuckyWheelService;
 import com.foxpify.shopifyapi.client.Session;
 import com.foxpify.shopifyapi.client.ShopifyClient;
@@ -25,18 +25,16 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 
-import static com.foxpify.vertxorm.repository.query.QueryFactory.equal;
-
 public class LuckyWheelServiceImpl implements LuckyWheelService {
     private ShopifyClient shopifyClient;
     private ShopTokenRepository shopTokenRepository;
-    private SlideRepository slideRepository;
+    private WheelRepository wheelRepository;
     private AsyncLoadingCache<String, Session> sessionCache;
 
-    public LuckyWheelServiceImpl(ShopifyClient shopifyClient, ShopTokenRepository shopTokenRepository, SlideRepository slideRepository) {
+    public LuckyWheelServiceImpl(ShopifyClient shopifyClient, ShopTokenRepository shopTokenRepository, WheelRepository wheelRepository) {
         this.shopifyClient = shopifyClient;
         this.shopTokenRepository = shopTokenRepository;
-        this.slideRepository = slideRepository;
+        this.wheelRepository = wheelRepository;
         sessionCache = Caffeine.newBuilder()
                 .maximumSize(10_000)
                 .expireAfterAccess(10, TimeUnit.HOURS)
@@ -57,10 +55,10 @@ public class LuckyWheelServiceImpl implements LuckyWheelService {
     public void auth(String shop, String code, String hmac, MultiMap params, Handler<AsyncResult<Void>> resultHandler) {
         if (shopifyClient.verifyRequest(hmac, params)) {
             shopifyClient.requestToken(shop, code).compose(authToken -> {
-                        ShopToken token = new ShopToken(shop, authToken);
+                        ShopToken token = new ShopToken(shop, code, true, authToken);
                         OffsetDateTime now = OffsetDateTime.now();
-                        token.setCreatedDate(now);
-                        token.setUpdatedDate(now);
+                        token.setCreatedAt(now);
+                        token.setUpdatedAt(now);
                         return shopTokenRepository.save(token);
                     }
             ).map(shopToken -> {
@@ -82,7 +80,6 @@ public class LuckyWheelServiceImpl implements LuckyWheelService {
                         .compose(asset -> updateAsset(session, asset))
                         .map(asset -> (Void) null)
                 ).setHandler(resultHandler);
-
     }
 
     Future<Asset> updateAsset(Session session, Asset asset) {
@@ -101,12 +98,13 @@ public class LuckyWheelServiceImpl implements LuckyWheelService {
 
     @Override
     public void spinWheel(SpinRequest spinReq, Handler<AsyncResult<Slide>> resultHandler) {
-        slideRepository.query(equal("wheel_id", spinReq.getWheelId())).map(slides -> {
+        wheelRepository.find(spinReq.getWheelId()).map(wheel -> {
+            var slides = wheel.orElseThrow().getSlides();
             int totalGravity = 0;
             int[] cumulatives = new int[slides.size()];
             for (int i = 0; i < slides.size(); ++i) {
                 cumulatives[i] = totalGravity;
-                totalGravity += slides.get(i).getGravity();
+                totalGravity += slides.get(i).getProbability();
             }
             int randGrav = ThreadLocalRandom.current().nextInt(totalGravity);
             int index = 0;

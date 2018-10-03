@@ -12,4 +12,7 @@ public interface ErrorCode {
 
     BusinessErrorCode SHOP_TOKEN_NOT_FOUND =
             new BusinessErrorCode("LW-4003", "Shop access token is not found", 400);
+
+    BusinessErrorCode ORIGIN_CANT_BE_VERIFIED =
+            new BusinessErrorCode("LW-4004", "Request origin cannot be verified", 403);
 }

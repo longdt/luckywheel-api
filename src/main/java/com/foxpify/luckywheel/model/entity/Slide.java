@@ -1,28 +1,10 @@
 package com.foxpify.luckywheel.model.entity;
 
 public class Slide {
-    private Long slideId;
-    private Long wheelId;
     private String label;
     private String discountCode;
     private Long discountCodeId;
-    private int gravity;
-
-    public Long getSlideId() {
-        return slideId;
-    }
-
-    public void setSlideId(Long slideId) {
-        this.slideId = slideId;
-    }
-
-    public Long getWheelId() {
-        return wheelId;
-    }
-
-    public void setWheelId(Long wheelId) {
-        this.wheelId = wheelId;
-    }
+    private int probability;
 
     public String getLabel() {
         return label;
@@ -48,11 +30,11 @@ public class Slide {
         this.discountCodeId = discountCodeId;
     }
 
-    public int getGravity() {
-        return gravity;
+    public int getProbability() {
+        return probability;
     }
 
-    public void setGravity(int gravity) {
-        this.gravity = gravity;
+    public void setProbability(int probability) {
+        this.probability = probability;
     }
 }

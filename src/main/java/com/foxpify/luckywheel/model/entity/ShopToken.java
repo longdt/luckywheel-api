@@ -7,19 +7,23 @@ import java.time.OffsetDateTime;
 
 public class ShopToken {
     private String shop;
+    private boolean permanentToken;
+    private String code;
     private String accessToken;
     private String scope;
-    private long expiresIn;
+    private Long expiresIn;
     private String associatedUserScope;
     private User associatedUser;
-    private OffsetDateTime createdDate;
-    private OffsetDateTime updatedDate;
+    private OffsetDateTime createdAt;
+    private OffsetDateTime updatedAt;
 
     public ShopToken() {
     }
 
-    public ShopToken(String shop, OAuthToken authToken) {
+    public ShopToken(String shop, String code, boolean permanentToken, OAuthToken authToken) {
         this.shop = shop;
+        this.permanentToken = permanentToken;
+        this.code = code;
         this.accessToken = authToken.getAccessToken();
         this.scope = authToken.getScope();
         this.expiresIn = authToken.getExpiresIn();
@@ -33,6 +37,22 @@ public class ShopToken {
 
     public void setShop(String shop) {
         this.shop = shop;
+    }
+
+    public boolean isPermanentToken() {
+        return permanentToken;
+    }
+
+    public void setPermanentToken(boolean permanentToken) {
+        this.permanentToken = permanentToken;
+    }
+
+    public String getCode() {
+        return code;
+    }
+
+    public void setCode(String code) {
+        this.code = code;
     }
 
     public String getAccessToken() {
@@ -51,11 +71,11 @@ public class ShopToken {
         this.scope = scope;
     }
 
-    public long getExpiresIn() {
+    public Long getExpiresIn() {
         return expiresIn;
     }
 
-    public void setExpiresIn(long expiresIn) {
+    public void setExpiresIn(Long expiresIn) {
         this.expiresIn = expiresIn;
     }
 
@@ -75,19 +95,19 @@ public class ShopToken {
         this.associatedUser = associatedUser;
     }
 
-    public OffsetDateTime getCreatedDate() {
-        return createdDate;
+    public OffsetDateTime getCreatedAt() {
+        return createdAt;
     }
 
-    public void setCreatedDate(OffsetDateTime createdDate) {
-        this.createdDate = createdDate;
+    public void setCreatedAt(OffsetDateTime createdAt) {
+        this.createdAt = createdAt;
     }
 
-    public OffsetDateTime getUpdatedDate() {
-        return updatedDate;
+    public OffsetDateTime getUpdatedAt() {
+        return updatedAt;
     }
 
-    public void setUpdatedDate(OffsetDateTime updatedDate) {
-        this.updatedDate = updatedDate;
+    public void setUpdatedAt(OffsetDateTime updatedAt) {
+        this.updatedAt = updatedAt;
     }
 }
