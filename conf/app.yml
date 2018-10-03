@@ -1,4 +1,4 @@
-appName: Bond-Api
+contextPath: /luckywheel
 httpPort: 8080
 httpHost: https://longdt.foxpify.com
 appKey: 6c1a338b2a7047c9771aa2a3d19ed587

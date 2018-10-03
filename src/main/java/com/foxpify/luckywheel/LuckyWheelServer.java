@@ -3,6 +3,7 @@ package com.foxpify.luckywheel;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.foxpify.luckywheel.conf.AppComponent;
+import com.foxpify.luckywheel.conf.AppConf;
 import com.foxpify.luckywheel.conf.AppModule;
 import com.foxpify.luckywheel.conf.DaggerAppComponent;
 import com.foxpify.luckywheel.handler.ExceptionHandler;
@@ -33,18 +34,25 @@ public class LuckyWheelServer {
     private void init() {
         Router router = Router.router(vertx);
         AppModule module = new AppModule(vertx);
-        port = module.provideAppConf().getHttpPort();
+        AppConf conf = module.provideAppConf();
+        port = conf.getHttpPort();
         AppComponent creator = DaggerAppComponent.builder().appModule(module).build();
         LuckyWheelHandler luckyWheelHandler = creator.createLuckyWheelHandler();
         router.route().handler(LoggerHandler.create());
         router.route().handler(CookieHandler.create());
         router.route().handler(BodyHandler.create());
-        router.get("/luckywheel/install").handler(luckyWheelHandler::install);
-        router.get("/luckywheel/auth").handler(luckyWheelHandler::auth);
-        router.post("/luckywheel/wheels/:wheelId/spin").handler(luckyWheelHandler::spinWheel);
+        router.mountSubRouter(conf.getContextPath(), createRouter(luckyWheelHandler));
         router.route("/static/*").handler(StaticHandler.create("www"));
         router.route().failureHandler(ExceptionHandler::handle);
         server.requestHandler(router::accept);
+    }
+
+    private Router createRouter(LuckyWheelHandler luckyWheelHandler) {
+        Router router = Router.router(vertx);
+        router.get("/install").handler(luckyWheelHandler::install);
+        router.get("/auth").handler(luckyWheelHandler::auth);
+        router.post("/wheels/:wheelId/spin").handler(luckyWheelHandler::spinWheel);
+        return router;
     }
 
     public void start() {

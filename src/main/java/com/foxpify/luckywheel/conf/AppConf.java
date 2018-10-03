@@ -3,7 +3,7 @@ package com.foxpify.luckywheel.conf;
 import io.vertx.core.json.JsonObject;
 
 public class AppConf {
-    private String appName;
+    private String contextPath;
     private int httpPort;
     private String httpHost;
     private String appKey;
@@ -17,12 +17,12 @@ public class AppConf {
         this.jsonObject = jsonObject;
     }
 
-    public String getAppName() {
-        return appName;
+    public String getContextPath() {
+        return contextPath;
     }
 
-    public void setAppName(String appName) {
-        this.appName = appName;
+    public void setContextPath(String contextPath) {
+        this.contextPath = contextPath;
     }
 
     public JsonObject getDatasource() {

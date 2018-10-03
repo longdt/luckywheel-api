@@ -35,17 +35,38 @@ public class LuckyWheelServiceImpl implements LuckyWheelService {
     private ShopifyClient shopifyClient;
     private ShopTokenRepository shopTokenRepository;
     private WheelRepository wheelRepository;
-    private AsyncLoadingCache<Long, ShopToken> tokenCache;
+    private AsyncLoadingCache<Long, ShopToken> tokenByIdCache;
+    private AsyncLoadingCache<String, ShopToken> tokenByShopCache;
 
     public LuckyWheelServiceImpl(ShopifyClient shopifyClient, ShopTokenRepository shopTokenRepository, WheelRepository wheelRepository) {
         this.shopifyClient = shopifyClient;
         this.shopTokenRepository = shopTokenRepository;
         this.wheelRepository = wheelRepository;
-        tokenCache = Caffeine.newBuilder()
+        tokenByIdCache = Caffeine.newBuilder()
                 .maximumSize(10_000)
                 .expireAfterAccess(10, TimeUnit.HOURS)
-                .buildAsync((tokenId, executor) -> Futures.toCompletableFuture(shopTokenRepository.querySingle(byTokenId(tokenId)).map(
-                        tokenOpt -> tokenOpt.orElseThrow(() -> new ShopTokenNotFoundException("tokenId: " + tokenId)))));
+                .buildAsync((tokenId, executor) -> {
+                    Future<ShopToken> tokenFuture = shopTokenRepository.querySingle(byTokenId(tokenId))
+                            .map(tokenOpt -> {
+                                ShopToken token = tokenOpt.orElseThrow(() -> new ShopTokenNotFoundException("tokenId: " + tokenId));
+                                tokenByShopCache.put(token.getShop(), CompletableFuture.completedFuture(token));
+                                return token;
+                            });
+                    return Futures.toCompletableFuture(tokenFuture);
+                });
+
+        tokenByShopCache = Caffeine.newBuilder()
+                .maximumSize(10_000)
+                .expireAfterAccess(10, TimeUnit.HOURS)
+                .buildAsync((shop, executor) -> {
+                    Future<ShopToken> tokenFuture = shopTokenRepository.querySingle(byShop(shop))
+                            .map(tokenOpt -> {
+                                ShopToken token = tokenOpt.orElseThrow(() -> new ShopTokenNotFoundException("shop: " + shop));
+                                tokenByIdCache.put(token.getId(), CompletableFuture.completedFuture(token));
+                                return token;
+                            });
+                    return Futures.toCompletableFuture(tokenFuture);
+                });
     }
 
     private Query<ShopToken> byShop(String shop) {
@@ -64,17 +85,21 @@ public class LuckyWheelServiceImpl implements LuckyWheelService {
     @Override
     public void auth(String shop, String code, String hmac, MultiMap params, Handler<AsyncResult<Void>> resultHandler) {
         if (shopifyClient.verifyRequest(hmac, params)) {
-            shopifyClient.requestToken(shop, code).compose(authToken -> {
-                        ShopToken token = new ShopToken(shop, authToken);
-                        OffsetDateTime now = OffsetDateTime.now();
-                        token.setCreatedAt(now);
-                        token.setUpdatedAt(now);
-                        return shopTokenRepository.save(token);
-                    }
-            ).map(shopToken -> {
-                tokenCache.put(shopToken.getId(), CompletableFuture.completedFuture(shopToken));
-                return (Void) null;
-            }).setHandler(resultHandler);
+            Futures.toFuture(tokenByShopCache.get(shop))
+                    .recover(t ->
+                            shopifyClient.requestToken(shop, code).compose(authToken -> {
+                                        ShopToken token = new ShopToken(shop, authToken);
+                                        OffsetDateTime now = OffsetDateTime.now();
+                                        token.setCreatedAt(now);
+                                        token.setUpdatedAt(now);
+                                        return shopTokenRepository.save(token);
+                                    }
+                            ).map(shopToken -> {
+                                tokenByIdCache.put(shopToken.getId(), CompletableFuture.completedFuture(shopToken));
+                                tokenByShopCache.put(shopToken.getShop(), CompletableFuture.completedFuture(shopToken));
+                                return shopToken;
+                            }))
+                    .map(st -> (Void) null).setHandler(resultHandler);
         } else {
             throw new InvalidHmacException("HMAC validation failed");
         }
@@ -90,12 +115,17 @@ public class LuckyWheelServiceImpl implements LuckyWheelService {
                 .compose(shopToken -> {
                     shopToken.setDeleted(true);
                     return shopTokenRepository.save(shopToken);
-                }).map(shopToken -> (Void) null).setHandler(resultHandler);
+                })
+                .map(shopToken -> {
+                    tokenByShopCache.synchronous().invalidate(shopToken.getShop());
+                    tokenByIdCache.synchronous().invalidate(shopToken.getId());
+                    return (Void) null;
+                }).setHandler(resultHandler);
     }
 
     @Override
     public void createWheelGui(Long tokenId, Handler<AsyncResult<Void>> resultHandler) {
-        Futures.toFuture(tokenCache.get(tokenId))
+        Futures.toFuture(tokenByIdCache.get(tokenId))
                 .map(t -> shopifyClient.newSession(t.getShop(), t.getAccessToken()))
                 .compose(session ->
                         session.findThemes().map(themes -> themes.stream().filter(theme -> theme.getRole() == Theme.Role.MAIN).findFirst().orElse(null))
