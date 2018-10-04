@@ -8,6 +8,7 @@ import com.foxpify.luckywheel.conf.AppModule;
 import com.foxpify.luckywheel.conf.DaggerAppComponent;
 import com.foxpify.luckywheel.handler.ExceptionHandler;
 import com.foxpify.luckywheel.handler.LuckyWheelHandler;
+import com.foxpify.luckywheel.util.Constant;
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpServer;
 import io.vertx.core.json.Json;
@@ -49,9 +50,10 @@ public class LuckyWheelServer {
 
     private Router createRouter(LuckyWheelHandler luckyWheelHandler) {
         Router router = Router.router(vertx);
-        router.get("/install").handler(luckyWheelHandler::install);
-        router.get("/auth").handler(luckyWheelHandler::auth);
-        router.post("/wheels/:wheelId/spin").handler(luckyWheelHandler::spinWheel);
+        router.get(Constant.INSTALL_ENDPOINT).handler(luckyWheelHandler::install);
+        router.post(Constant.UNINSTALL_ENDPOINT).handler(luckyWheelHandler::uninstall);
+        router.get(Constant.AUTH_ENDPOINT).handler(luckyWheelHandler::auth);
+        router.post(Constant.SPIN_WHEEL_ENDPOINT).handler(luckyWheelHandler::spinWheel);
         return router;
     }
 

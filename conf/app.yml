@@ -4,7 +4,7 @@ httpHost: https://longdt.foxpify.com
 appKey: 6c1a338b2a7047c9771aa2a3d19ed587
 appSecret: 389af99afbe007fd6d6c3c43457b718a
 
-
+adminUrl: https://www.youtube.com/embed/Q3580ndaVII
 datasource:
   host: postgres.db.foxpify.com
   port: 5432

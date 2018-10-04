@@ -62,8 +62,8 @@ public class AppModule {
 
     @Singleton
     @Provides
-    LuckyWheelService provideLuckyWheelService(ShopifyClient shopifyClient, ShopTokenRepository shopTokenRepository, WheelRepository wheelRepository) {
-        return new LuckyWheelServiceImpl(shopifyClient, shopTokenRepository, wheelRepository);
+    LuckyWheelService provideLuckyWheelService(AppConf appConf, ShopifyClient shopifyClient, ShopTokenRepository shopTokenRepository, WheelRepository wheelRepository) {
+        return new LuckyWheelServiceImpl(appConf, shopifyClient, shopTokenRepository, wheelRepository);
     }
 
     @Singleton

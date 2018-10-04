@@ -8,6 +8,7 @@ public class AppConf {
     private String httpHost;
     private String appKey;
     private String appSecret;
+    private String adminUrl;
     private JsonObject jsonObject;
 
     public AppConf() {
@@ -64,6 +65,14 @@ public class AppConf {
 
     public String getAppSecret() {
         return appSecret;
+    }
+
+    public String getAdminUrl() {
+        return adminUrl;
+    }
+
+    public void setAdminUrl(String adminUrl) {
+        this.adminUrl = adminUrl;
     }
 
     public void setAppSecret(String appSecret) {

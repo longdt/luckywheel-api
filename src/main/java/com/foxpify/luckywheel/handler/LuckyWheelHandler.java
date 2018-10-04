@@ -6,6 +6,7 @@ import com.foxpify.luckywheel.exception.ValidateException;
 import com.foxpify.luckywheel.model.entity.Slide;
 import com.foxpify.luckywheel.model.request.SpinRequest;
 import com.foxpify.luckywheel.service.LuckyWheelService;
+import com.foxpify.luckywheel.util.Constant;
 import com.foxpify.luckywheel.util.Responses;
 import com.foxpify.shopifyapi.util.Json;
 import io.vertx.ext.web.Cookie;
@@ -16,14 +17,14 @@ import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class LuckyWheelHandler {
-    public static String AUTH_ENPOINT = "/luckywheel/auth";
-    public static String INSTALL_ENPOINT = "/luckywheel/install";
     private LuckyWheelService luckyWheelService;
     private String authUrl;
+    private String adminUrl;
 
     @Inject
     public LuckyWheelHandler(AppConf appConf, LuckyWheelService luckyWheelService) {
-        this.authUrl = appConf.getHttpHost() + AUTH_ENPOINT;
+        this.authUrl = appConf.getHttpHost() + appConf.getContextPath() + Constant.AUTH_ENDPOINT;
+        this.adminUrl = appConf.getAdminUrl();
         this.luckyWheelService = luckyWheelService;
     }
 
@@ -42,13 +43,9 @@ public class LuckyWheelHandler {
         String hmac = routingContext.request().getHeader("X-Shopify-Hmac-SHA256");
         String shop = routingContext.request().getHeader("X-Shopify-Shop-Domain");
         String topic = routingContext.request().getHeader("X-Shopify-Topic");
-        if ("app/uninstalled".equals(topic)) {
-            luckyWheelService.uninstall(shop, hmac, routingContext.getBody(), new ResponseHandler<>(routingContext) {
-                @Override
-                public void success(Void result) throws Throwable {
-                    Responses.ok(routingContext);
-                }
-            });
+        if (Constant.UNINSTALLED_TOPIC.equals(topic)) {
+            luckyWheelService.uninstall(shop, hmac, routingContext.getBody());
+            Responses.ok(routingContext);
         } else {
             Responses.badRequest(routingContext);
         }
@@ -66,10 +63,10 @@ public class LuckyWheelHandler {
         if (stateCookie == null || !state.equals(stateCookie.getValue())) {
             throw new ValidateException(ErrorCode.ORIGIN_CANT_BE_VERIFIED, "Request origin cannot be verified");
         }
-        luckyWheelService.auth(shop, code, hmac, routingContext.request().params(), new ResponseHandler<>(routingContext) {
+        luckyWheelService.auth(shop, code, hmac, routingContext.request().params(), new ResponseHandler<Void>(routingContext) {
             @Override
             public void success(Void result) throws Throwable {
-                Responses.ok(routingContext);
+                Responses.redirect(routingContext, adminUrl);
             }
         });
     }
@@ -82,7 +79,7 @@ public class LuckyWheelHandler {
         UUID wheelId = UUID.fromString(routingContext.request().getParam("wheelId"));
         SpinRequest spinReq = Json.decodeValue(routingContext.getBody(), SpinRequest.class);
         spinReq.setWheelId(wheelId);
-        luckyWheelService.spinWheel(spinReq, new ResponseHandler<>(routingContext) {
+        luckyWheelService.spinWheel(spinReq, new ResponseHandler<Slide>(routingContext) {
             @Override
             public void success(Slide result) throws Throwable {
                 Responses.ok(routingContext, result);

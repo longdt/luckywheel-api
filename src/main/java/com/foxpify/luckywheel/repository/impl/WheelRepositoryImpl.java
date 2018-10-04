@@ -3,7 +3,6 @@ package com.foxpify.luckywheel.repository.impl;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.foxpify.luckywheel.model.entity.Slide;
 import com.foxpify.luckywheel.model.entity.Wheel;
-import com.foxpify.luckywheel.model.entity.Wheel;
 import com.foxpify.luckywheel.repository.WheelRepository;
 import com.foxpify.vertxorm.repository.impl.AbstractCrudRepository;
 import com.foxpify.vertxorm.repository.impl.Config;
@@ -25,7 +24,7 @@ public class WheelRepositoryImpl extends AbstractCrudRepository<UUID, Wheel> imp
                 .addTimestampTzField("updated_at", Wheel::getUpdatedAt, Wheel::setUpdatedAt)
                 .addTimestampTzField("started_at", Wheel::getStartedAt, Wheel::setStartedAt)
                 .addTimestampTzField("completed_at", Wheel::getCompletedAt, Wheel::setCompletedAt)
-                .addJsonField("slides", Wheel::getSlides, Wheel::setSlides, new TypeReference<>() {
+                .addJsonField("slides", Wheel::getSlides, Wheel::setSlides, new TypeReference<List<Slide>>() {
                 })
                 .build();
         init(sqlClient, conf);
