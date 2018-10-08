@@ -3,7 +3,6 @@ package com.foxpify.luckywheel.service.impl;
 import com.foxpify.luckywheel.conf.AppConf;
 import com.foxpify.luckywheel.exception.InvalidHmacException;
 import com.foxpify.luckywheel.model.entity.Shop;
-import com.foxpify.luckywheel.service.CampaignService;
 import com.foxpify.luckywheel.service.InstallService;
 import com.foxpify.luckywheel.service.ShopService;
 import com.foxpify.luckywheel.util.Constant;
@@ -17,6 +16,9 @@ import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.MultiMap;
 import io.vertx.core.buffer.Buffer;
+import io.vertx.core.json.JsonObject;
+import io.vertx.ext.auth.jwt.JWTAuth;
+import io.vertx.ext.jwt.JWTOptions;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -29,14 +31,15 @@ public class InstallServiceImpl implements InstallService {
     private static final Logger logger = LogManager.getLogger(InstallServiceImpl.class);
     private ShopifyClient shopifyClient;
     private ShopService shopService;
-
+    private JWTAuth jwtAuth;
     private String uninstalledUrl;
 
     @Inject
-    public InstallServiceImpl(AppConf appConf, ShopifyClient shopifyClient, ShopService shopService) {
+    public InstallServiceImpl(AppConf appConf, ShopifyClient shopifyClient, ShopService shopService, JWTAuth jwtAuth) {
         this.uninstalledUrl = appConf.getHttpHost() + appConf.getContextPath() + Constant.UNINSTALL_ENDPOINT;
         this.shopifyClient = shopifyClient;
         this.shopService = shopService;
+        this.jwtAuth = jwtAuth;
     }
 
     @Override
@@ -45,7 +48,7 @@ public class InstallServiceImpl implements InstallService {
     }
 
     @Override
-    public void auth(String shop, String code, String hmac, MultiMap params, Handler<AsyncResult<Void>> resultHandler) {
+    public void auth(String shop, String code, String hmac, MultiMap params, Handler<AsyncResult<String>> resultHandler) {
         if (shopifyClient.verifyRequest(hmac, params)) {
             shopService.getShop(shop)
                     .recover(t ->
@@ -56,10 +59,16 @@ public class InstallServiceImpl implements InstallService {
                                 return shopService.createShop(new Shop(shop, authToken));
                             })
                     );
-            Future.<Void>succeededFuture().setHandler(resultHandler);
+            Future.succeededFuture(generateJwtToken(shop)).setHandler(resultHandler);
         } else {
             throw new InvalidHmacException("HMAC validation failed");
         }
+    }
+
+    private String generateJwtToken(String shop) {
+        JsonObject claims = new JsonObject().put("sub", shop);
+        JWTOptions options = new JWTOptions();
+        return jwtAuth.generateToken(claims, options);
     }
 
     @Override

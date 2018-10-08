@@ -72,8 +72,13 @@ public class AppModule {
 
     @Singleton
     @Provides
-    JWTAuthHandler provideJWTAuthHandler(AppConf appConf) {
-        JWTAuth jwtAuth = JWTAuth.create(vertx, new JWTAuthOptions(appConf.getJWTAuthOptions()));
+    JWTAuth provideJWTAuth(AppConf appConf) {
+        return JWTAuth.create(vertx, new JWTAuthOptions(appConf.getJWTAuthOptions()));
+    }
+
+    @Singleton
+    @Provides
+    JWTAuthHandler provideJWTAuthHandler(JWTAuth jwtAuth) {
         return JWTAuthHandler.create(jwtAuth);
     }
 

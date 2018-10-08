@@ -12,7 +12,7 @@ public interface InstallService {
 
     String install(String shop, String authUrl);
 
-    void auth(String shop, String code, String hmac, MultiMap params, Handler<AsyncResult<Void>> resultHandler);
+    void auth(String shop, String code, String hmac, MultiMap params, Handler<AsyncResult<String>> resultHandler);
 
     default Future<Void> uninstall(String shop, String hmac, Buffer body) {
         return Futures.toFuture(this::uninstall, shop, hmac, body);

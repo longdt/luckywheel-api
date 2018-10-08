@@ -61,10 +61,10 @@ public class InstallHandler {
         if (stateCookie == null || !state.equals(stateCookie.getValue())) {
             throw new ValidateException(ErrorCode.ORIGIN_CANT_BE_VERIFIED, "Request origin cannot be verified");
         }
-        installService.auth(shop, code, hmac, routingContext.request().params(), new ResponseHandler<Void>(routingContext) {
+        installService.auth(shop, code, hmac, routingContext.request().params(), new ResponseHandler<String>(routingContext) {
             @Override
-            public void success(Void result) throws Throwable {
-                Responses.redirect(routingContext, adminUrl);
+            public void success(String result) throws Throwable {
+                Responses.redirect(routingContext, adminUrl + "?token=" + result);
             }
         });
     }
