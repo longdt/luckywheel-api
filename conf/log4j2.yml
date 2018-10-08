@@ -1,28 +1,60 @@
-Configutation:
-  name: Default
-
-  Properties:
-    Property:
-      name: log-path
-      value: "logs"
-
+Configuration:
+  status: warn
   Appenders:
-
     Console:
-      name: Console_Appender
+      name: CONSOLE
       target: SYSTEM_OUT
       PatternLayout:
-        pattern: "[%-5level] %d{yyyy-MM-dd HH:mm:ss.SSS} [%t] %c{1} - %msg%n"
-
-    File:
-      name: File_Appender
-      fileName: ${log-path}/logfile.log
+        pattern: '%d{yyyy/MM/dd HH:mm:ss.SSS} %-5level - [%t] %c{1} - %m%n'
+    RollingRandomAccessFile:
+    - name: INFO
+      fileName: log/luckywheel-api.log
+      filePattern: log/$${date:yyyy-MM}/%d{yyyy-MM-dd}-luckywheel-api-%i.log.gz
       PatternLayout:
-        pattern: "[%-5level] %d{yyyy-MM-dd HH:mm:ss.SSS} [%t] %c{1} - %msg%n"
-
+        pattern: '%d{yyyy/MM/dd HH:mm:ss.SSS} %-5level - [%t] %c{1} - %m%n'
+      Policies:
+        TimeBasedTriggeringPolicy: {
+          }
+        OnStartupTriggeringPolicy: {
+          }
+        SizeBasedTriggeringPolicy:
+          size: 200 MB
+    - name: ERROR
+      fileName: log/luckywheel-api-error.log
+      filePattern: log/$${date:yyyy-MM}/%d{yyyy-MM-dd}-luckywheel-api-error-%i.log.gz
+      PatternLayout:
+        pattern: '%d{yyyy/MM/dd HH:mm:ss.SSS} %-5level - [%t] %c - %m%n'
+      Policies:
+        TimeBasedTriggeringPolicy: {
+          }
+    - name: JSON
+      fileName: log/luckywheel-api.json
+      filePattern: log/$${date:yyyy-MM}/%d{yyyy-MM-dd}-luckywheel-api-%i.json.gz
+      JSONLayout:
+        stacktraceAsString: true
+        compact: true
+        eventEol: true
+      Policies:
+        TimeBasedTriggeringPolicy: {
+          }
+        OnStartupTriggeringPolicy: {
+          }
+        SizeBasedTriggeringPolicy:
+          size: 200 MB
   Loggers:
-
+    Logger:
+    - name: EventLogger
+      level: info
+      additivity: false
+      AppenderRef:
+      - ref: ERROR
+      - ref: INFO
+      - ref: JSON
     Root:
       level: info
       AppenderRef:
-      - ref: Console_Appender
+      - ref: CONSOLE
+      - ref: ERROR
+        level: error
+      - ref: INFO
+      - ref: JSON
