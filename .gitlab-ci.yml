@@ -15,6 +15,7 @@ variables:
   RANCHER_URL: http://rancher.foxpify.com:8080/
   RANCHER_ACCESS_KEY: $R_ACCESS_KEY
   RANCHER_SECRET_KEY: $R_SECRET_KEY
+  VERSION: $(date +"%y.%m.%d")
 
 
 cache:
@@ -52,7 +53,6 @@ dockerize_dev:
   only:
   - master
   script:
-  - export VERSION=$(date +"%y.%m.%d")
   - docker build -t registry.gitlab.com/foxpify/$SERVICE_NAME:$VERSION .
   - docker login registry.gitlab.com -u $IRUSER -p $IRPASS
   - docker push registry.gitlab.com/foxpify/$SERVICE_NAME:$VERSION
