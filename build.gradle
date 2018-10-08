@@ -1,10 +1,22 @@
+buildscript {
+    repositories {
+        jcenter()
+    }
+    dependencies {
+        classpath 'com.github.jengelman.gradle.plugins:shadow:2.0.4'
+    }
+}
+
 plugins {
     id 'java'
+    id 'application'
     id "net.ltgt.apt-idea" version "0.18"
+    id 'com.github.johnrengelman.shadow' version '2.0.4'
 }
 
 group 'com.foxpify'
 version '1.0-SNAPSHOT'
+mainClassName ='com.foxpify.luckywheel.LuckyWheelServer'
 
 sourceCompatibility = 1.11
 targetCompatibility = 1.11
