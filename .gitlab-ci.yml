@@ -28,25 +28,23 @@ cache:
 # Build
 #
 build:
-  image: openjdk:11
   stage: build
-  tags:
-  - dev
-
+#  tags:
+#  - dev
+  image: gradle:4.10.2-jdk11
   only:
   - master
   script:
-  - ./gradlew build
-
+  - gradle build
 
 #
 # Dockerize other environment
 #
 dockerize_dev:
-  image: docker:latest
   stage: dockerize
   tags:
   - dev
+  image: docker:latest
   variables:
     DOCKER_DRIVER: overlay
   services:
@@ -63,10 +61,10 @@ dockerize_dev:
 # DEPLOY development
 # 
 deploy_dev:
-  image: kimwoochoong/rancher-compose:latest
   stage: deploy
-  tags:
-  - dev
+#  tags:
+#  - dev
+  image: kimwoochoong/rancher-compose:latest
   only:
   - master
   script:
