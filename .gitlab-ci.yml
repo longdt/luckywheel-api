@@ -11,15 +11,17 @@ stages:
 
 before_script:
  - export VERSION=$(date +"%y.%m.%d")
+ - export RANCHER_URL=http://rancher.foxpify.com:8080/
+ - export RANCHER_ACCESS_KEY=$R_ACCESS_KEY
+ - export RANCHER_SECRET_KEY=$R_SECRET_KEY
 
 
 variables:
   IMAGE_TAG: $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_NAME
   MAVEN_OPTS: "-Dmaven.repo.local=.m2/repository"
   SERVICE_NAME: luckywheel-api
-  RANCHER_URL: http://rancher.foxpify.com:8080/
-  RANCHER_ACCESS_KEY: $R_ACCESS_KEY
-  RANCHER_SECRET_KEY: $R_SECRET_KEY
+  STACK_NAME: Service
+
 
 
 cache:
@@ -73,6 +75,6 @@ deploy_dev:
   - master
   script:
   - 'sed -i "/foxpify\/$(echo $SERVICE_NAME)/c\  \  image\: registry.gitlab.com\/foxpify\/$(echo $SERVICE_NAME):$(echo $VERSION)" docker-compose.yml'
-  - rancher-compose up -d --force-upgrade
+  - rancher-compose -f docker-compose.yml -r rancher-compose.yml -p $STACK_NAME up -d --force-upgrade -c $SERVICE_NAME
   when: on_success
 
