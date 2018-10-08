@@ -3,6 +3,11 @@ httpPort: 8080
 httpHost: https://longdt.foxpify.com
 appKey: 6c1a338b2a7047c9771aa2a3d19ed587
 appSecret: 389af99afbe007fd6d6c3c43457b718a
+jwt.auth.options:
+  keyStore:
+    type: jceks
+    path: conf/keystore.jceks
+    password: ETP7nZoLTXLQxZUrgBgrHOpA+cYRLHcQ2tPGWwvd0eo=
 
 adminUrl: https://www.youtube.com/embed/Q3580ndaVII
 datasource:

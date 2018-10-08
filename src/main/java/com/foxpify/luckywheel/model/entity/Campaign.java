@@ -1,12 +1,15 @@
 package com.foxpify.luckywheel.model.entity;
 
+import com.dslplatform.json.CompiledJson;
+
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.UUID;
 
-public class Wheel {
+@CompiledJson
+public class Campaign {
     private UUID id;
-    private String shop;
+    private Long shopId;
     private OffsetDateTime createdAt;
     private OffsetDateTime updatedAt;
     private String name;
@@ -24,12 +27,12 @@ public class Wheel {
         this.id = id;
     }
 
-    public String getShop() {
-        return shop;
+    public Long getShopId() {
+        return shopId;
     }
 
-    public void setShop(String shop) {
-        this.shop = shop;
+    public void setShopId(Long shopId) {
+        this.shopId = shopId;
     }
 
     public OffsetDateTime getCreatedAt() {

@@ -5,17 +5,17 @@ import com.dslplatform.json.CompiledJson;
 import java.util.UUID;
 
 @CompiledJson
-public class SpinRequest {
-    private UUID wheelId;
+public class SubscribeRequest {
+    private UUID campaignId;
     private String fullName;
     private String email;
 
-    public UUID getWheelId() {
-        return wheelId;
+    public UUID getCampaignId() {
+        return campaignId;
     }
 
-    public void setWheelId(UUID wheelId) {
-        this.wheelId = wheelId;
+    public void setCampaignId(UUID campaignId) {
+        this.campaignId = campaignId;
     }
 
     public String getFullName() {

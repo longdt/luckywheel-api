@@ -6,17 +6,16 @@ import com.foxpify.luckywheel.conf.AppComponent;
 import com.foxpify.luckywheel.conf.AppConf;
 import com.foxpify.luckywheel.conf.AppModule;
 import com.foxpify.luckywheel.conf.DaggerAppComponent;
+import com.foxpify.luckywheel.handler.CampaignHandler;
 import com.foxpify.luckywheel.handler.ExceptionHandler;
-import com.foxpify.luckywheel.handler.LuckyWheelHandler;
+import com.foxpify.luckywheel.handler.InstallHandler;
+import com.foxpify.luckywheel.handler.SubscriberHandler;
 import com.foxpify.luckywheel.util.Constant;
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpServer;
 import io.vertx.core.json.Json;
 import io.vertx.ext.web.Router;
-import io.vertx.ext.web.handler.BodyHandler;
-import io.vertx.ext.web.handler.CookieHandler;
-import io.vertx.ext.web.handler.LoggerHandler;
-import io.vertx.ext.web.handler.StaticHandler;
+import io.vertx.ext.web.handler.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -34,27 +33,37 @@ public class LuckyWheelServer {
 
     private void init() {
         Router router = Router.router(vertx);
-        AppModule module = new AppModule(vertx);
-        AppConf conf = module.provideAppConf();
-        port = conf.getHttpPort();
-        AppComponent creator = DaggerAppComponent.builder().appModule(module).build();
-        LuckyWheelHandler luckyWheelHandler = creator.createLuckyWheelHandler();
         router.route().handler(LoggerHandler.create());
         router.route().handler(CookieHandler.create());
         router.route().handler(BodyHandler.create());
-        router.mountSubRouter(conf.getContextPath(), createRouter(luckyWheelHandler));
-        router.route("/static/*").handler(StaticHandler.create("www"));
         router.route().failureHandler(ExceptionHandler::handle);
-        server.requestHandler(router::accept);
+
+        AppComponent appComponent = DaggerAppComponent.builder().appModule(new AppModule(vertx)).build();
+        router.route(Constant.ADMIN_SUBROUTE_ENDPOINT + "/*").handler(appComponent.jWTAuthHandler());
+        initInstallRouter(router, appComponent.installHandler());
+        initCampaignRouter(router, appComponent.campaignHandler());
+        initSubscriberRouter(router, appComponent.subscriberHandler());
+        router.route("/static/*").handler(StaticHandler.create("www"));
+
+        Router mainRouter = Router.router(vertx);
+        AppConf conf = appComponent.appConf();
+        port = conf.getHttpPort();
+        mainRouter.mountSubRouter(conf.getContextPath(), router);
+        server.requestHandler(mainRouter::accept);
     }
 
-    private Router createRouter(LuckyWheelHandler luckyWheelHandler) {
-        Router router = Router.router(vertx);
-        router.get(Constant.INSTALL_ENDPOINT).handler(luckyWheelHandler::install);
-        router.post(Constant.UNINSTALL_ENDPOINT).handler(luckyWheelHandler::uninstall);
-        router.get(Constant.AUTH_ENDPOINT).handler(luckyWheelHandler::auth);
-        router.post(Constant.SPIN_WHEEL_ENDPOINT).handler(luckyWheelHandler::spinWheel);
-        return router;
+    private void initInstallRouter(Router router, InstallHandler installHandler) {
+        router.get(Constant.INSTALL_ENDPOINT).handler(installHandler::install);
+        router.post(Constant.UNINSTALL_ENDPOINT).handler(installHandler::uninstall);
+        router.get(Constant.AUTH_ENDPOINT).handler(installHandler::auth);
+    }
+
+    private void initCampaignRouter(Router router, CampaignHandler campaignHandler) {
+        router.post(Constant.ADMIN_SUBROUTE_ENDPOINT + "/campaigns").handler(campaignHandler::createCampaign);
+    }
+
+    private void initSubscriberRouter(Router router, SubscriberHandler subscriberHandler) {
+        router.post(Constant.SUBSCRIBE_ENDPOINT).handler(subscriberHandler::subscribe);
     }
 
     public void start() {

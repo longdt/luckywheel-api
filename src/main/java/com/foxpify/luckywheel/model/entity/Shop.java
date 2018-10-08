@@ -1,11 +1,13 @@
 package com.foxpify.luckywheel.model.entity;
 
+import com.dslplatform.json.CompiledJson;
 import com.foxpify.shopifyapi.model.OAuthToken;
 import com.foxpify.shopifyapi.model.User;
 
 import java.time.OffsetDateTime;
 
-public class ShopToken {
+@CompiledJson
+public class Shop {
     private Long id;
     private String shop;
     private String accessToken;
@@ -17,10 +19,10 @@ public class ShopToken {
     private OffsetDateTime updatedAt;
     private boolean deleted;
 
-    public ShopToken() {
+    public Shop() {
     }
 
-    public ShopToken(String shop, OAuthToken authToken) {
+    public Shop(String shop, OAuthToken authToken) {
         this.shop = shop;
         this.accessToken = authToken.getAccessToken();
         this.scope = authToken.getScope();

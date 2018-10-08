@@ -1,9 +1,11 @@
 package com.foxpify.luckywheel.model.entity;
 
+import com.dslplatform.json.CompiledJson;
+
+@CompiledJson
 public class Slide {
     private String label;
     private String discountCode;
-    private Long discountCodeId;
     private int probability;
 
     public String getLabel() {
@@ -20,14 +22,6 @@ public class Slide {
 
     public void setDiscountCode(String discountCode) {
         this.discountCode = discountCode;
-    }
-
-    public Long getDiscountCodeId() {
-        return discountCodeId;
-    }
-
-    public void setDiscountCodeId(Long discountCodeId) {
-        this.discountCodeId = discountCodeId;
     }
 
     public int getProbability() {

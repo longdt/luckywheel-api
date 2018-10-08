@@ -1,12 +1,19 @@
 package com.foxpify.luckywheel.conf;
 
-import com.foxpify.luckywheel.handler.LuckyWheelHandler;
-import com.foxpify.luckywheel.repository.ShopTokenRepository;
-import com.foxpify.luckywheel.repository.WheelRepository;
-import com.foxpify.luckywheel.repository.impl.ShopTokenRepositoryImpl;
-import com.foxpify.luckywheel.repository.impl.WheelRepositoryImpl;
-import com.foxpify.luckywheel.service.LuckyWheelService;
-import com.foxpify.luckywheel.service.impl.LuckyWheelServiceImpl;
+import com.foxpify.luckywheel.repository.CampaignRepository;
+import com.foxpify.luckywheel.repository.ShopRepository;
+import com.foxpify.luckywheel.repository.SubscriberRepository;
+import com.foxpify.luckywheel.repository.impl.CampaignRepositoryImpl;
+import com.foxpify.luckywheel.repository.impl.ShopRepositoryImpl;
+import com.foxpify.luckywheel.repository.impl.SubscriberRepositoryImpl;
+import com.foxpify.luckywheel.service.CampaignService;
+import com.foxpify.luckywheel.service.InstallService;
+import com.foxpify.luckywheel.service.ShopService;
+import com.foxpify.luckywheel.service.SubscriberService;
+import com.foxpify.luckywheel.service.impl.CampaignServiceImpl;
+import com.foxpify.luckywheel.service.impl.InstallServiceImpl;
+import com.foxpify.luckywheel.service.impl.ShopServiceImpl;
+import com.foxpify.luckywheel.service.impl.SubscriberServiceImpl;
 import com.foxpify.shopifyapi.client.ShopifyClient;
 import com.foxpify.shopifyapi.client.ShopifyClientImpl;
 import com.foxpify.shopifyapi.util.Futures;
@@ -19,7 +26,10 @@ import io.vertx.core.Future;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.asyncsql.PostgreSQLClient;
+import io.vertx.ext.auth.jwt.JWTAuth;
+import io.vertx.ext.auth.jwt.JWTAuthOptions;
 import io.vertx.ext.sql.SQLClient;
+import io.vertx.ext.web.handler.JWTAuthHandler;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -56,32 +66,50 @@ public class AppModule {
 
     @Singleton
     @Provides
-    LuckyWheelHandler provideLuckyWheelHandler(AppConf appConf, LuckyWheelService luckyWheelService)  {
-        return new LuckyWheelHandler(appConf, luckyWheelService);
-    }
-
-    @Singleton
-    @Provides
-    LuckyWheelService provideLuckyWheelService(AppConf appConf, ShopifyClient shopifyClient, ShopTokenRepository shopTokenRepository, WheelRepository wheelRepository) {
-        return new LuckyWheelServiceImpl(appConf, shopifyClient, shopTokenRepository, wheelRepository);
-    }
-
-    @Singleton
-    @Provides
-    ShopTokenRepository provideShopTokenRepository(SQLClient sqlClient) {
-        return new ShopTokenRepositoryImpl(sqlClient);
-    }
-
-    @Singleton
-    @Provides
-    WheelRepository provideSlideRepository(SQLClient sqlClient) {
-        return new WheelRepositoryImpl(sqlClient);
-    }
-
-    @Singleton
-    @Provides
     ShopifyClient provideShopifyClient(AppConf appConf) {
         return new ShopifyClientImpl(vertx, appConf.getAppKey(), appConf.getAppSecret());
+    }
+
+    @Singleton
+    @Provides
+    JWTAuthHandler provideJWTAuthHandler(AppConf appConf) {
+        JWTAuth jwtAuth = JWTAuth.create(vertx, new JWTAuthOptions(appConf.getJWTAuthOptions()));
+        return JWTAuthHandler.create(jwtAuth);
+    }
+
+    @Provides
+    InstallService provideInstallService(InstallServiceImpl installService) {
+        return installService;
+    }
+
+    @Provides
+    ShopService provideShopService(ShopServiceImpl shopService) {
+        return shopService;
+    }
+
+    @Provides
+    ShopRepository provideShopRepository(ShopRepositoryImpl shopRepository) {
+        return shopRepository;
+    }
+
+    @Provides
+    CampaignService provideCampaignService(CampaignServiceImpl campaignService) {
+        return campaignService;
+    }
+
+    @Provides
+    CampaignRepository provideCampaignRepository(CampaignRepositoryImpl campaignRepository) {
+        return campaignRepository;
+    }
+
+    @Provides
+    SubscriberService provideSubscriberService(SubscriberServiceImpl subscriberService) {
+        return subscriberService;
+    }
+
+    @Provides
+    SubscriberRepository provideSubscriberRepository(SubscriberRepositoryImpl subscriberRepository) {
+        return subscriberRepository;
     }
 
     @Singleton

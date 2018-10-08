@@ -30,6 +30,10 @@ public class AppConf {
         return jsonObject.getJsonObject("datasource");
     }
 
+    public JsonObject getJWTAuthOptions() {
+        return jsonObject.getJsonObject("jwt.auth.options");
+    }
+
     AppConf setJsonObject(JsonObject jsonObject) {
         this.jsonObject = jsonObject;
         return this;
