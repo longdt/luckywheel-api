@@ -11,7 +11,7 @@ stages:
 variables:
   IMAGE_TAG: $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_NAME
   MAVEN_OPTS: "-Dmaven.repo.local=.m2/repository"
-  SERVICE_NAME: luckeywheel-api
+  SERVICE_NAME: luckywheel-api
   RANCHER_URL: http://rancher.foxpify.com:8080/
   RANCHER_ACCESS_KEY: $R_ACCESS_KEY
   RANCHER_SECRET_KEY: $R_SECRET_KEY
@@ -52,7 +52,7 @@ dockerize_dev:
   only:
   - master
   script:
-  - export VERSION=$(date '+%Y.%m.%d')
+  - export VERSION=$(date +"%y.%m.%d")
   - docker build -t registry.gitlab.com/foxpify/$SERVICE_NAME:$VERSION .
   - docker login registry.gitlab.com -u $IRUSER -p $IRPASS
   - docker push registry.gitlab.com/foxpify/$SERVICE_NAME:$VERSION
