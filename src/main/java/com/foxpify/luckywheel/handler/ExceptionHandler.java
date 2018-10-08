@@ -13,7 +13,11 @@ public class ExceptionHandler {
     private static final Logger logger = LogManager.getLogger(ExceptionHandler.class);
 
     public static void handle(RoutingContext routingContext) {
-        handle(routingContext, routingContext.failure());
+        Throwable cause = routingContext.failure();
+        if (routingContext.statusCode() == 401) {
+            cause = new BusinessException(ErrorCode.UNAUTHENTICATED_ERROR, (String) null);
+        }
+        handle(routingContext, cause);
     }
 
     public static void handle(RoutingContext routingContext, Throwable cause) {

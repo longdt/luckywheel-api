@@ -1,6 +1,6 @@
 package com.foxpify.luckywheel.service.impl;
 
-import com.foxpify.luckywheel.exception.ShopTokenNotFoundException;
+import com.foxpify.luckywheel.exception.ShopNotFoundException;
 import com.foxpify.luckywheel.model.entity.Shop;
 import com.foxpify.luckywheel.repository.ShopRepository;
 import com.foxpify.luckywheel.service.ShopService;
@@ -35,7 +35,7 @@ public class ShopServiceImpl implements ShopService {
                 .expireAfterAccess(10, TimeUnit.HOURS)
                 .buildAsync((shop, executor) -> {
                     Future<Shop> tokenFuture = shopRepository.querySingle(byShop(shop))
-                            .map(tokenOpt -> tokenOpt.orElseThrow(() -> new ShopTokenNotFoundException("DB shop: " + shop)));
+                            .map(tokenOpt -> tokenOpt.orElseThrow(() -> new ShopNotFoundException("DB shop: " + shop)));
                     return Futures.toCompletableFuture(tokenFuture);
                 });
     }
@@ -56,7 +56,7 @@ public class ShopServiceImpl implements ShopService {
     @Override
     public Future<Shop> getShop(Long shopId) {
         return shopRepository.querySingle(byId(shopId))
-                .map(tokenOpt -> tokenOpt.orElseThrow(() -> new ShopTokenNotFoundException("DB shop: " + shopId)));
+                .map(tokenOpt -> tokenOpt.orElseThrow(() -> new ShopNotFoundException("DB shop: " + shopId)));
     }
 
     @Override

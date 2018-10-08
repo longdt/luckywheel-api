@@ -6,7 +6,7 @@ import java.util.concurrent.ThreadLocalRandom;
 
 public class ErrorResponse {
     private final String id;
-    private final String error;
+    private final String code;
     private final String message;
     private final String description;
 
@@ -14,15 +14,17 @@ public class ErrorResponse {
     private final int charA = (int) 'a';
     private final int charZPlusOne = (int) 'z' + 1;
 
-
-    public ErrorResponse(String error, String message) {
-        this(error, message, null);
+    @CompiledJson
+    ErrorResponse(String id, String code, String message, String description) {
+        this.id = id;
+        this.code = code;
+        this.message = message;
+        this.description = description;
     }
 
-    @CompiledJson
-    public ErrorResponse(String error, String message, String description) {
+    public ErrorResponse(String code, String message, String description) {
         this.id = generateId();
-        this.error = error;
+        this.code = code;
         this.message = message;
         this.description = description;
     }
@@ -40,8 +42,8 @@ public class ErrorResponse {
         return id;
     }
 
-    public String getError() {
-        return error;
+    public String getCode() {
+        return code;
     }
 
     public String getMessage() {
@@ -56,7 +58,7 @@ public class ErrorResponse {
     public String toString() {
         return "ErrorResponse{" +
                 "id='" + id + '\'' +
-                ", error='" + error + '\'' +
+                ", code='" + code + '\'' +
                 ", message='" + message + '\'' +
                 ", description='" + description + '\'' +
                 '}';

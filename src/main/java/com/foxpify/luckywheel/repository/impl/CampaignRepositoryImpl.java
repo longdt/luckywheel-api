@@ -17,8 +17,10 @@ public class CampaignRepositoryImpl extends AbstractCrudRepository<UUID, Campaig
     public CampaignRepositoryImpl(SQLClient sqlClient) {
         Config<UUID, Campaign> conf = new Config.Builder<UUID, Campaign>("campaign", Campaign::new)
                 .pk("id", Campaign::getId, Campaign::setId)
+                .pkConverter(UUID::toString, UUID::fromString)
                 .addField("shop_id", Campaign::getShopId, Campaign::setShopId)
                 .addField("name", Campaign::getName, Campaign::setName)
+                .addField("description", Campaign::getDescription, Campaign::setDescription)
                 .addField("active", Campaign::getActive, Campaign::setActive)
                 .addField("win_probability", Campaign::getWinProbability, Campaign::setWinProbability)
                 .addTimestampTzField("created_at", Campaign::getCreatedAt, Campaign::setCreatedAt)

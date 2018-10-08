@@ -11,6 +11,7 @@ import org.apache.logging.log4j.Logger;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
+import java.time.OffsetDateTime;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -32,6 +33,10 @@ public class CampaignServiceImpl implements CampaignService {
     @Override
     public void createCampaign(User user, Campaign campaign, Handler<AsyncResult<Campaign>> resultHandler) {
         campaign.setShopId(user.principal().getLong("sub"));
+        campaign.setId(UUID.randomUUID());
+        OffsetDateTime now = OffsetDateTime.now();
+        campaign.setCreatedAt(now);
+        campaign.setUpdatedAt(now);
         campaignRepository.save(campaign, resultHandler);
     }
 
