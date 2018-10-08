@@ -29,8 +29,8 @@ cache:
 #
 build:
   stage: build
-#  tags:
-#  - dev
+  tags:
+  - foxpify
   image: gradle:4.10.2-jdk11
   only:
   - master
@@ -43,7 +43,7 @@ build:
 dockerize_dev:
   stage: dockerize
   tags:
-  - dev
+  - foxpify
   image: docker:latest
   variables:
     DOCKER_DRIVER: overlay
@@ -62,8 +62,8 @@ dockerize_dev:
 # 
 deploy_dev:
   stage: deploy
-#  tags:
-#  - dev
+  tags:
+  - foxpify
   image: kimwoochoong/rancher-compose:latest
   only:
   - master
