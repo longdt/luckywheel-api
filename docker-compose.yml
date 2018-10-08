@@ -1,0 +1,7 @@
+version: '2'
+services:
+  luckywhell-api:
+    image: registry.gitlab.com/foxpify/luckywhell-api
+    stdin_open: true
+    labels:
+      io.rancher.container.pull_image: always
