@@ -24,10 +24,8 @@ public class CampaignHandler {
 
     public void createCampaign(RoutingContext routingContext) {
         Campaign campaign = Json.decodeValue(routingContext.getBody(), Campaign.class);
-        User user = routingContext.user();
-        campaign.setShopId(user.principal().getLong("shopId"));
         validator.validate(campaign);
-        campaignService.createCampaign(campaign, new ResponseHandler<Campaign>(routingContext) {
+        campaignService.createCampaign(routingContext.user(), campaign, new ResponseHandler<Campaign>(routingContext) {
 
             @Override
             public void success(Campaign result) throws Throwable {
