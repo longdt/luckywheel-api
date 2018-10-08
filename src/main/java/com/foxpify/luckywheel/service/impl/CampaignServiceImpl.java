@@ -3,14 +3,9 @@ package com.foxpify.luckywheel.service.impl;
 import com.foxpify.luckywheel.model.entity.Campaign;
 import com.foxpify.luckywheel.repository.CampaignRepository;
 import com.foxpify.luckywheel.service.CampaignService;
-import com.foxpify.luckywheel.service.ShopService;
-import com.foxpify.shopifyapi.client.Session;
-import com.foxpify.shopifyapi.client.ShopifyClient;
-import com.foxpify.shopifyapi.model.Asset;
-import com.foxpify.shopifyapi.model.Theme;
 import io.vertx.core.AsyncResult;
-import io.vertx.core.Future;
 import io.vertx.core.Handler;
+import io.vertx.ext.auth.User;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -35,8 +30,19 @@ public class CampaignServiceImpl implements CampaignService {
     }
 
     @Override
-    public void createCampaign(Campaign campaign, Handler<AsyncResult<Campaign>> resultHandler) {
+    public void createCampaign(User user, Campaign campaign, Handler<AsyncResult<Campaign>> resultHandler) {
+        campaign.setShopId(user.principal().getLong("sub"));
         campaignRepository.save(campaign, resultHandler);
+    }
+
+    @Override
+    public void updateCampaign(User user, Campaign campaign, Handler<AsyncResult<Campaign>> resultHandler) {
+
+    }
+
+    @Override
+    public void deleteCampaign(User user, UUID campaignId, Handler<AsyncResult<Campaign>> resultHandler) {
+
     }
 
 }

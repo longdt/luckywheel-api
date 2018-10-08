@@ -5,6 +5,7 @@ import com.foxpify.shopifyapi.util.Futures;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
+import io.vertx.ext.auth.User;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -16,5 +17,9 @@ public interface CampaignService {
 
     void getCampaign(UUID campaignId, Handler<AsyncResult<Optional<Campaign>>> resultHandler);
 
-    void createCampaign(Campaign campaign, Handler<AsyncResult<Campaign>> resultHandler);
+    void createCampaign(User user, Campaign campaign, Handler<AsyncResult<Campaign>> resultHandler);
+
+    void updateCampaign(User user, Campaign campaign, Handler<AsyncResult<Campaign>> resultHandler);
+
+    void deleteCampaign(User user, UUID campaignId, Handler<AsyncResult<Campaign>> resultHandler);
 }

@@ -5,6 +5,9 @@ import com.foxpify.luckywheel.repository.ShopRepository;
 import com.foxpify.shopifyapi.model.User;
 import com.foxpify.vertxorm.repository.impl.AbstractCrudRepository;
 import com.foxpify.vertxorm.repository.impl.Config;
+import io.vertx.core.AsyncResult;
+import io.vertx.core.Future;
+import io.vertx.core.Handler;
 import io.vertx.ext.sql.SQLClient;
 
 import javax.inject.Inject;
@@ -26,5 +29,16 @@ public class ShopRepositoryImpl extends AbstractCrudRepository<Long, Shop> imple
                 .addTimestampTzField("updated_at", Shop::getUpdatedAt, Shop::setUpdatedAt)
                 .build();
         init(sqlClient, conf);
+    }
+
+    @Override
+    public void nextId(Handler<AsyncResult<Long>> resultHandler) {
+        sqlClient.querySingle("select nextval('shop_id_seq')", ar -> {
+            if (ar.succeeded()) {
+                resultHandler.handle(Future.succeededFuture(ar.result().getLong(0)));
+            } else {
+                resultHandler.handle(Future.failedFuture(ar.cause()));
+            }
+        });
     }
 }

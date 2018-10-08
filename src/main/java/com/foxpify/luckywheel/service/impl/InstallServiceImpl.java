@@ -10,11 +10,10 @@ import com.foxpify.luckywheel.util.ErrorLogHandler;
 import com.foxpify.shopifyapi.client.Session;
 import com.foxpify.shopifyapi.client.ShopifyClient;
 import com.foxpify.shopifyapi.model.Asset;
+import com.foxpify.shopifyapi.model.OAuthToken;
 import com.foxpify.shopifyapi.model.Theme;
-import io.vertx.core.AsyncResult;
-import io.vertx.core.Future;
-import io.vertx.core.Handler;
-import io.vertx.core.MultiMap;
+import com.foxpify.shopifyapi.util.Futures;
+import io.vertx.core.*;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.jwt.JWTAuth;
@@ -25,6 +24,7 @@ import org.apache.logging.log4j.Logger;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
+import java.util.concurrent.CompletableFuture;
 
 @Singleton
 public class InstallServiceImpl implements InstallService {
@@ -51,22 +51,30 @@ public class InstallServiceImpl implements InstallService {
     public void auth(String shop, String code, String hmac, MultiMap params, Handler<AsyncResult<String>> resultHandler) {
         if (shopifyClient.verifyRequest(hmac, params)) {
             shopService.getShop(shop)
-                    .recover(t ->
-                            shopifyClient.requestToken(shop, code).compose(authToken -> {
-                                shopifyClient.newSession(shop, authToken.getAccessToken())
-                                        .createWebhook(Constant.UNINSTALLED_TOPIC, uninstalledUrl,
-                                                new ErrorLogHandler<>(logger, Level.ERROR, "can't create webhook for shop {}", shop));
-                                return shopService.createShop(new Shop(shop, authToken));
-                            })
-                    );
-            Future.succeededFuture(generateJwtToken(shop)).setHandler(resultHandler);
+                    .map(Shop::getId)
+                    .recover(t -> {
+                        CompletableFuture<Long> shopIdFuture = Futures.toCompletableFuture(shopService::nextId);
+                        CompositeFuture.all(Futures.toFuture(shopIdFuture), shopifyClient.requestToken(shop, code))
+                                .compose(compositeFuture -> {
+                                    Long shopId = compositeFuture.resultAt(0);
+                                    OAuthToken authToken = compositeFuture.resultAt(1);
+                                    shopifyClient.newSession(shop, authToken.getAccessToken())
+                                            .createWebhook(Constant.UNINSTALLED_TOPIC, uninstalledUrl,
+                                                    new ErrorLogHandler<>(logger, Level.ERROR, "can't create webhook for shop {}", shop));
+                                    Shop s = new Shop(shop, authToken);
+                                    s.setId(shopId);
+                                    return shopService.createShop(s);
+                                });
+                        return Futures.toFuture(shopIdFuture);
+                    }).map(shopId -> generateJwtToken(shopId, shop)).setHandler(resultHandler);
         } else {
             throw new InvalidHmacException("HMAC validation failed");
         }
     }
 
-    private String generateJwtToken(String shop) {
-        JsonObject claims = new JsonObject().put("sub", shop);
+    private String generateJwtToken(Long shopId, String shop) {
+        JsonObject claims = new JsonObject().put("sub", shopId)
+                .put("shop", shop);
         JWTOptions options = new JWTOptions();
         return jwtAuth.generateToken(claims, options);
     }

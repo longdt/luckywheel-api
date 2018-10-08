@@ -4,13 +4,13 @@ import com.foxpify.luckywheel.exception.ShopTokenNotFoundException;
 import com.foxpify.luckywheel.model.entity.Shop;
 import com.foxpify.luckywheel.repository.ShopRepository;
 import com.foxpify.luckywheel.service.ShopService;
-import com.foxpify.luckywheel.util.ErrorLogHandler;
 import com.foxpify.shopifyapi.util.Futures;
 import com.foxpify.vertxorm.repository.query.Query;
 import com.github.benmanes.caffeine.cache.AsyncLoadingCache;
 import com.github.benmanes.caffeine.cache.Caffeine;
+import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
-import org.apache.logging.log4j.Level;
+import io.vertx.core.Handler;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -69,6 +69,12 @@ public class ShopServiceImpl implements ShopService {
             return shopToken;
         });
     }
+
+    @Override
+    public void nextId(Handler<AsyncResult<Long>> resultHandler) {
+        shopRepository.nextId(resultHandler);
+    }
+
 
     @Override
     public Future<Void> removeShop(String shop) {
