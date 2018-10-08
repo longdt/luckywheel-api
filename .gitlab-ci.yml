@@ -8,6 +8,11 @@ stages:
 - dockerize
 - deploy
 
+
+before_script:
+ - export VERSION=$(date +"%y.%m.%d")
+
+
 variables:
   IMAGE_TAG: $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_NAME
   MAVEN_OPTS: "-Dmaven.repo.local=.m2/repository"
@@ -15,7 +20,6 @@ variables:
   RANCHER_URL: http://rancher.foxpify.com:8080/
   RANCHER_ACCESS_KEY: $R_ACCESS_KEY
   RANCHER_SECRET_KEY: $R_SECRET_KEY
-  VERSION: $(date +"%y.%m.%d")
 
 
 cache:
