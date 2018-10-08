@@ -15,6 +15,8 @@ import java.time.OffsetDateTime;
 import java.util.Optional;
 import java.util.UUID;
 
+import static com.foxpify.vertxorm.repository.query.QueryFactory.*;
+
 @Singleton
 public class CampaignServiceImpl implements CampaignService {
     private static final Logger logger = LogManager.getLogger(InstallServiceImpl.class);
@@ -28,6 +30,12 @@ public class CampaignServiceImpl implements CampaignService {
     @Override
     public void getCampaign(UUID campaignId, Handler<AsyncResult<Optional<Campaign>>> resultHandler) {
         campaignRepository.find(campaignId, resultHandler);
+    }
+
+    @Override
+    public void getCampaign(User user, UUID campaignId, Handler<AsyncResult<Optional<Campaign>>> resultHandler) {
+        Long shopId = user.principal().getLong("sub");
+        campaignRepository.querySingle(and(equal("id", campaignId.toString()), equal("shop_id", shopId)), resultHandler);
     }
 
     @Override

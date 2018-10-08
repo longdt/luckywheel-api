@@ -59,7 +59,10 @@ public class LuckyWheelServer {
     }
 
     private void initCampaignRouter(Router router, CampaignHandler campaignHandler) {
-        router.post(Constant.ADMIN_SUBROUTE_ENDPOINT + "/campaigns").handler(campaignHandler::createCampaign);
+        router.post(Constant.ADMIN_SUBROUTE_ENDPOINT + Constant.CREAT_OR_PAGE_CAMPAIGN_ENDPOINT)
+                .handler(campaignHandler::createCampaign);
+        router.get(Constant.ADMIN_SUBROUTE_ENDPOINT + Constant.GET_OR_UPDATE_CAMPAIGN_ENDPOINT)
+                .handler(campaignHandler::getCampaign);
     }
 
     private void initSubscriberRouter(Router router, SubscriberHandler subscriberHandler) {

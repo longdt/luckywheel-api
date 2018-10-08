@@ -6,7 +6,7 @@ import com.dslplatform.json.CompiledJson;
 public class Slide {
     private String label;
     private String discountCode;
-    private int probability;
+    private Float probability;
 
     public String getLabel() {
         return label;
@@ -24,11 +24,11 @@ public class Slide {
         this.discountCode = discountCode;
     }
 
-    public int getProbability() {
+    public Float getProbability() {
         return probability;
     }
 
-    public void setProbability(int probability) {
+    public void setProbability(Float probability) {
         this.probability = probability;
     }
 }

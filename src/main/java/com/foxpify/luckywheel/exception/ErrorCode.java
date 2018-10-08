@@ -8,14 +8,17 @@ public interface ErrorCode {
             new BusinessErrorCode("LW-4001", "Invalid hmac error", 400);
 
     BusinessErrorCode REQUIRED_PARAMETERS_MISSING =
-            new BusinessErrorCode("LW-4002", "Required parameters missing", 400);
+            new BusinessErrorCode("LW-4002", "Required parameters missing or invalid", 400);
 
     BusinessErrorCode SHOP_NOT_FOUND =
-            new BusinessErrorCode("LW-4003", "Shop access token is not found", 400);
+            new BusinessErrorCode("LW-4003", "Shop is not found", 400);
 
     BusinessErrorCode ORIGIN_CANT_BE_VERIFIED =
             new BusinessErrorCode("LW-4004", "Request origin cannot be verified", 403);
 
     BusinessErrorCode UNAUTHENTICATED_ERROR =
             new BusinessErrorCode("LW-4005", "Unauthorized error", 401);
+
+    BusinessErrorCode CAMPAIGN_NOT_FOUND =
+            new BusinessErrorCode("LW-4006", "Campaign is not found", 400);
 }

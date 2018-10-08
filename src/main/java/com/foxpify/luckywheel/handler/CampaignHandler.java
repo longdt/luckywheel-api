@@ -1,15 +1,19 @@
 package com.foxpify.luckywheel.handler;
 
+import com.foxpify.luckywheel.exception.BusinessException;
+import com.foxpify.luckywheel.exception.CampaignNotFoundException;
+import com.foxpify.luckywheel.exception.ErrorCode;
 import com.foxpify.luckywheel.model.entity.Campaign;
 import com.foxpify.luckywheel.service.CampaignService;
 import com.foxpify.luckywheel.util.Responses;
 import com.foxpify.luckywheel.validate.CampaignValidator;
 import com.foxpify.shopifyapi.util.Json;
-import io.vertx.ext.auth.User;
 import io.vertx.ext.web.RoutingContext;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
+import java.util.Optional;
+import java.util.UUID;
 
 @Singleton
 public class CampaignHandler {
@@ -30,6 +34,22 @@ public class CampaignHandler {
             @Override
             public void success(Campaign result) throws Throwable {
                 Responses.ok(routingContext, result);
+            }
+        });
+    }
+
+    public void getCampaign(RoutingContext routingContext) {
+        UUID campaignId;
+        try {
+            campaignId = UUID.fromString(routingContext.request().getParam("campaignId"));
+        } catch (Exception e) {
+            throw new BusinessException(ErrorCode.REQUIRED_PARAMETERS_MISSING, "require valid campaignId param");
+        }
+        campaignService.getCampaign(routingContext.user(), campaignId, new ResponseHandler<Optional<Campaign>>(routingContext) {
+
+            @Override
+            public void success(Optional<Campaign> result) throws Throwable {
+                Responses.ok(routingContext, result.orElseThrow(() -> new CampaignNotFoundException("campaign " + campaignId + " is not found")));
             }
         });
     }

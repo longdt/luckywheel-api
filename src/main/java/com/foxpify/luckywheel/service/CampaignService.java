@@ -17,6 +17,8 @@ public interface CampaignService {
 
     void getCampaign(UUID campaignId, Handler<AsyncResult<Optional<Campaign>>> resultHandler);
 
+    void getCampaign(User user, UUID campaignId, Handler<AsyncResult<Optional<Campaign>>> resultHandler);
+
     void createCampaign(User user, Campaign campaign, Handler<AsyncResult<Campaign>> resultHandler);
 
     void updateCampaign(User user, Campaign campaign, Handler<AsyncResult<Campaign>> resultHandler);
