@@ -2,7 +2,7 @@ FROM openjdk:11
 
 VOLUME /tmp
 
-ADD build/libs/*.jar /app.jar
+ADD build/libs/*-all.jar /app.jar
 
 # Add entrypoint.sh script
 ADD entrypoint.sh /entrypoint.sh

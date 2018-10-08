@@ -31,11 +31,11 @@ build:
   stage: build
   tags:
   - dev
-  image: gradle:jdk11
+  image: openjdk:11
   only:
   - master
   script:
-  - gradle build
+  - ./gradlew build
 
 #
 # Dockerize other environment
