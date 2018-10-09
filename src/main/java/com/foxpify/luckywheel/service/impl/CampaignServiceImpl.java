@@ -95,6 +95,7 @@ public class CampaignServiceImpl implements CampaignService {
         Model.copyNonNull(src::getStartedAt, dest::setStartedAt);
         Model.copyNonNull(src::getCompletedAt, dest::setCompletedAt);
         Model.copyNonNull(src::getSlides, dest::setSlides);
+        Model.copyNonNull(src::getMetadata, dest::setMetadata);
     }
 
     @Override
