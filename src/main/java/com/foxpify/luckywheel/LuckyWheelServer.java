@@ -59,14 +59,25 @@ public class LuckyWheelServer {
     }
 
     private void initCampaignRouter(Router router, CampaignHandler campaignHandler) {
-        router.post(Constant.ADMIN_SUBROUTE_ENDPOINT + Constant.CREAT_OR_PAGE_CAMPAIGN_ENDPOINT)
+        router.post(Constant.ADMIN_SUBROUTE_ENDPOINT + Constant.CREAT_CAMPAIGN_ENDPOINT)
                 .handler(campaignHandler::createCampaign);
-        router.get(Constant.ADMIN_SUBROUTE_ENDPOINT + Constant.GET_OR_UPDATE_CAMPAIGN_ENDPOINT)
+        router.get(Constant.ADMIN_SUBROUTE_ENDPOINT + Constant.GET_CAMPAIGNS_ENDPOINT)
+                .handler(campaignHandler::getCampaigns);
+        router.get(Constant.ADMIN_SUBROUTE_ENDPOINT + Constant.GET_CAMPAIGN_ENDPOINT)
                 .handler(campaignHandler::getCampaign);
+        router.patch(Constant.ADMIN_SUBROUTE_ENDPOINT + Constant.UPDATE_CAMPAIGN_ENDPOINT)
+                .handler(campaignHandler::updateCampaign);
+        router.post(Constant.ADMIN_SUBROUTE_ENDPOINT + Constant.ACTIVATE_CAMPAIGN_ENDPOINT)
+                .handler(campaignHandler::activateCampaign);
+        router.post(Constant.ADMIN_SUBROUTE_ENDPOINT + Constant.DEACTIVATE_CAMPAIGN_ENDPOINT)
+                .handler(campaignHandler::deactivateCampaign);
+        router.delete(Constant.ADMIN_SUBROUTE_ENDPOINT + Constant.DELETE_CAMPAIGN_ENDPOINT)
+                .handler(campaignHandler::deleteCampaign);
     }
 
     private void initSubscriberRouter(Router router, SubscriberHandler subscriberHandler) {
         router.post(Constant.SUBSCRIBE_ENDPOINT).handler(subscriberHandler::subscribe);
+        router.get(Constant.GET_SUBSCRIBERS_ENDPOINT).handler(subscriberHandler::getSubscribers);
     }
 
     public void start() {

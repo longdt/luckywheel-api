@@ -1,8 +1,14 @@
 package com.foxpify.luckywheel.service.impl;
 
+import com.foxpify.luckywheel.exception.CampaignNotFoundException;
+import com.foxpify.luckywheel.handler.ResponseHandler;
 import com.foxpify.luckywheel.model.entity.Campaign;
 import com.foxpify.luckywheel.repository.CampaignRepository;
 import com.foxpify.luckywheel.service.CampaignService;
+import com.foxpify.luckywheel.util.Model;
+import com.foxpify.vertxorm.repository.query.Query;
+import com.foxpify.vertxorm.util.Page;
+import com.foxpify.vertxorm.util.PageRequest;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Handler;
 import io.vertx.ext.auth.User;
@@ -15,7 +21,8 @@ import java.time.OffsetDateTime;
 import java.util.Optional;
 import java.util.UUID;
 
-import static com.foxpify.vertxorm.repository.query.QueryFactory.*;
+import static com.foxpify.vertxorm.repository.query.QueryFactory.and;
+import static com.foxpify.vertxorm.repository.query.QueryFactory.equal;
 
 @Singleton
 public class CampaignServiceImpl implements CampaignService {
@@ -29,13 +36,25 @@ public class CampaignServiceImpl implements CampaignService {
 
     @Override
     public void getCampaign(UUID campaignId, Handler<AsyncResult<Optional<Campaign>>> resultHandler) {
-        campaignRepository.find(campaignId, resultHandler);
+        campaignRepository.find(campaignId).map(campaign -> campaign.map(c -> {
+            if (c.getSlides() != null) {
+                c.getSlides().forEach(s -> s.setDiscountCode(null));
+            }
+            return c;
+        })).setHandler(resultHandler);
     }
 
     @Override
     public void getCampaign(User user, UUID campaignId, Handler<AsyncResult<Optional<Campaign>>> resultHandler) {
         Long shopId = user.principal().getLong("sub");
         campaignRepository.find(and(equal("id", campaignId.toString()), equal("shop_id", shopId)), resultHandler);
+    }
+
+    @Override
+    public void getCampaigns(User user, PageRequest pageRequest, ResponseHandler<Page<Campaign>> resultHandler) {
+        Long shopId = user.principal().getLong("sub");
+        Query<Campaign> query = equal("shop_id", shopId);
+        campaignRepository.findAll(query, pageRequest, resultHandler);
     }
 
     @Override
@@ -59,12 +78,40 @@ public class CampaignServiceImpl implements CampaignService {
 
     @Override
     public void updateCampaign(User user, Campaign campaign, Handler<AsyncResult<Campaign>> resultHandler) {
-        setupSlideIndex(campaign);
+        getCampaign(user, campaign.getId()).compose(campaignOpt -> {
+            Campaign origin = campaignOpt.orElseThrow(() -> new CampaignNotFoundException("campaign " + campaign.getId() + " is not found"));
+            copyNonNull(campaign, origin);
+            setupSlideIndex(origin);
+            origin.setUpdatedAt(OffsetDateTime.now());
+            return campaignRepository.update(origin);
+        }).setHandler(resultHandler);
+    }
+
+    private void copyNonNull(Campaign src, Campaign dest) {
+        Model.copyNonNull(src::getName, dest::setName);
+        Model.copyNonNull(src::getDescription, dest::setDescription);
+        Model.copyNonNull(src::getActive, dest::setActive);
+        Model.copyNonNull(src::getWinProbability, dest::setWinProbability);
+        Model.copyNonNull(src::getStartedAt, dest::setStartedAt);
+        Model.copyNonNull(src::getCompletedAt, dest::setCompletedAt);
+        Model.copyNonNull(src::getSlides, dest::setSlides);
     }
 
     @Override
-    public void deleteCampaign(User user, UUID campaignId, Handler<AsyncResult<Campaign>> resultHandler) {
+    public void setActiveCampaign(User user, UUID campaignId, boolean active, Handler<AsyncResult<Campaign>> resultHandler) {
+        getCampaign(user, campaignId).compose(campaignOpt -> {
+            Campaign campaign = campaignOpt.orElseThrow(() -> new CampaignNotFoundException("campaign " + campaignId + " is not found"));
+            campaign.setActive(active);
+            return campaignRepository.save(campaign);
+        }).setHandler(resultHandler);
+    }
 
+    @Override
+    public void deleteCampaign(User user, UUID campaignId, Handler<AsyncResult<Void>> resultHandler) {
+        getCampaign(user, campaignId).compose(campaignOpt -> {
+            campaignOpt.orElseThrow(() -> new CampaignNotFoundException("campaign " + campaignId + " is not found"));
+            return campaignRepository.delete(campaignId);
+        }).setHandler(resultHandler);
     }
 
 }
