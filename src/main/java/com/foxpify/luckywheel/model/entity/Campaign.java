@@ -1,6 +1,7 @@
 package com.foxpify.luckywheel.model.entity;
 
 import com.dslplatform.json.CompiledJson;
+import io.vertx.core.json.JsonObject;
 
 import java.time.OffsetDateTime;
 import java.util.List;
@@ -19,6 +20,7 @@ public class Campaign {
     private OffsetDateTime startedAt;
     private OffsetDateTime completedAt;
     private List<Slide> slides;
+    private JsonObject metadata;
 
     public UUID getId() {
         return id;
@@ -106,5 +108,13 @@ public class Campaign {
 
     public void setSlides(List<Slide> slides) {
         this.slides = slides;
+    }
+
+    public JsonObject getMetadata() {
+        return metadata;
+    }
+
+    public void setMetadata(JsonObject metadata) {
+        this.metadata = metadata;
     }
 }

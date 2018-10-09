@@ -6,6 +6,7 @@ import com.foxpify.luckywheel.model.entity.Slide;
 import com.foxpify.luckywheel.repository.CampaignRepository;
 import com.foxpify.vertxorm.repository.impl.AbstractCrudRepository;
 import com.foxpify.vertxorm.repository.impl.Config;
+import io.vertx.core.json.JsonObject;
 import io.vertx.ext.sql.SQLClient;
 
 import javax.inject.Inject;
@@ -29,6 +30,7 @@ public class CampaignRepositoryImpl extends AbstractCrudRepository<UUID, Campaig
                 .addTimestampTzField("completed_at", Campaign::getCompletedAt, Campaign::setCompletedAt)
                 .addJsonField("slides", Campaign::getSlides, Campaign::setSlides, new TypeReference<List<Slide>>() {
                 })
+                .addJsonField("metadata", Campaign::getMetadata, Campaign::setMetadata, JsonObject.class)
                 .build();
         init(sqlClient, conf);
     }
