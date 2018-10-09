@@ -1,11 +1,16 @@
 package com.foxpify.luckywheel.handler;
 
+import com.foxpify.luckywheel.exception.ErrorCode;
+import com.foxpify.luckywheel.exception.ValidateException;
 import com.foxpify.luckywheel.model.entity.Slide;
+import com.foxpify.luckywheel.model.entity.Subscriber;
 import com.foxpify.luckywheel.model.request.SubscribeRequest;
 import com.foxpify.luckywheel.service.SubscriberService;
 import com.foxpify.luckywheel.util.Responses;
 import com.foxpify.luckywheel.validate.SubscribeRequestValidator;
 import com.foxpify.shopifyapi.util.Json;
+import com.foxpify.vertxorm.util.Page;
+import com.foxpify.vertxorm.util.PageRequest;
 import io.vertx.ext.web.RoutingContext;
 
 import javax.inject.Inject;
@@ -34,5 +39,25 @@ public class SubscriberHandler {
                 Responses.ok(routingContext, result);
             }
         });
+    }
+
+    public void getSubscribers(RoutingContext routingContext) {
+        try {
+            int page = Integer.parseInt(routingContext.request().getParam("page"));
+            int size = Integer.parseInt(routingContext.request().getParam("size"));
+            if (page <= 0 || size <= 0) {
+                throw new ValidateException(ErrorCode.REQUIRED_PARAMETERS_MISSING_OR_INVALID, "Page index must start from 1 and size must > 0");
+            }
+
+            subscriberService.getSubscribers(routingContext.user(), new PageRequest(page, size), new ResponseHandler<Page<Subscriber>>(routingContext) {
+                @Override
+                public void success(Page<Subscriber> result) {
+                    Responses.ok(routingContext, result);
+                }
+            });
+        } catch (NumberFormatException e) {
+            throw new ValidateException(ErrorCode.REQUIRED_PARAMETERS_MISSING_OR_INVALID, "page=" + routingContext.request().getParam("page")
+                    + " size=" + routingContext.request().getParam("size"), e);
+        }
     }
 }

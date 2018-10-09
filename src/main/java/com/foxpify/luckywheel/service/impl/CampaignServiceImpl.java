@@ -35,7 +35,7 @@ public class CampaignServiceImpl implements CampaignService {
     @Override
     public void getCampaign(User user, UUID campaignId, Handler<AsyncResult<Optional<Campaign>>> resultHandler) {
         Long shopId = user.principal().getLong("sub");
-        campaignRepository.querySingle(and(equal("id", campaignId.toString()), equal("shop_id", shopId)), resultHandler);
+        campaignRepository.find(and(equal("id", campaignId.toString()), equal("shop_id", shopId)), resultHandler);
     }
 
     @Override
@@ -45,12 +45,21 @@ public class CampaignServiceImpl implements CampaignService {
         OffsetDateTime now = OffsetDateTime.now();
         campaign.setCreatedAt(now);
         campaign.setUpdatedAt(now);
+        setupSlideIndex(campaign);
         campaignRepository.save(campaign, resultHandler);
+    }
+
+    private void setupSlideIndex(Campaign campaign) {
+        if (campaign.getSlides() != null) {
+            for (int i = 0, n = campaign.getSlides().size(); i < n; ++i) {
+                campaign.getSlides().get(i).setIndex(i);
+            }
+        }
     }
 
     @Override
     public void updateCampaign(User user, Campaign campaign, Handler<AsyncResult<Campaign>> resultHandler) {
-
+        setupSlideIndex(campaign);
     }
 
     @Override

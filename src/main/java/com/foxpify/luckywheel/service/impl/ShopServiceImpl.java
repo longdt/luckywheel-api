@@ -34,7 +34,7 @@ public class ShopServiceImpl implements ShopService {
                 .maximumSize(10_000)
                 .expireAfterAccess(10, TimeUnit.HOURS)
                 .buildAsync((shop, executor) -> {
-                    Future<Shop> tokenFuture = shopRepository.querySingle(byShop(shop))
+                    Future<Shop> tokenFuture = shopRepository.find(byShop(shop))
                             .map(tokenOpt -> tokenOpt.orElseThrow(() -> new ShopNotFoundException("DB shop: " + shop)));
                     return Futures.toCompletableFuture(tokenFuture);
                 });
@@ -55,7 +55,7 @@ public class ShopServiceImpl implements ShopService {
 
     @Override
     public Future<Shop> getShop(Long shopId) {
-        return shopRepository.querySingle(byId(shopId))
+        return shopRepository.find(byId(shopId))
                 .map(tokenOpt -> tokenOpt.orElseThrow(() -> new ShopNotFoundException("DB shop: " + shopId)));
     }
 

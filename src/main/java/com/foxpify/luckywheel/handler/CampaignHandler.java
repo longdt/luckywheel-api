@@ -1,8 +1,8 @@
 package com.foxpify.luckywheel.handler;
 
-import com.foxpify.luckywheel.exception.BusinessException;
 import com.foxpify.luckywheel.exception.CampaignNotFoundException;
 import com.foxpify.luckywheel.exception.ErrorCode;
+import com.foxpify.luckywheel.exception.ValidateException;
 import com.foxpify.luckywheel.model.entity.Campaign;
 import com.foxpify.luckywheel.service.CampaignService;
 import com.foxpify.luckywheel.util.Responses;
@@ -43,7 +43,7 @@ public class CampaignHandler {
         try {
             campaignId = UUID.fromString(routingContext.request().getParam("campaignId"));
         } catch (Exception e) {
-            throw new BusinessException(ErrorCode.REQUIRED_PARAMETERS_MISSING, "require valid campaignId param");
+            throw new ValidateException(ErrorCode.REQUIRED_PARAMETERS_MISSING_OR_INVALID, "require valid campaignId param");
         }
         campaignService.getCampaign(routingContext.user(), campaignId, new ResponseHandler<Optional<Campaign>>(routingContext) {
 

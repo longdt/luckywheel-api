@@ -1,4 +1,7 @@
 package com.foxpify.luckywheel.repository;
 
-public interface SubscriberRepository {
+import com.foxpify.luckywheel.model.entity.Subscriber;
+import com.foxpify.vertxorm.repository.CrudRepository;
+
+public interface SubscriberRepository extends CrudRepository<Long, Subscriber> {
 }

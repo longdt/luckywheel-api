@@ -29,7 +29,7 @@ public class InstallHandler {
     public void install(RoutingContext routingContext) {
         String shop = routingContext.request().getParam("shop");
         if (shop == null) {
-            throw new ValidateException(ErrorCode.REQUIRED_PARAMETERS_MISSING, "Missing shop parameter. Please add ?shop=your-development-shop.myshopify.com to your request");
+            throw new ValidateException(ErrorCode.REQUIRED_PARAMETERS_MISSING_OR_INVALID, "Missing shop parameter. Please add ?shop=your-development-shop.myshopify.com to your request");
         }
         int state = ThreadLocalRandom.current().nextInt();
         String redirectUrl = installService.install(shop, authUrl) + "&state=" + state;
@@ -55,7 +55,7 @@ public class InstallHandler {
         String hmac = routingContext.request().getParam("hmac");
         String state = routingContext.request().getParam("state");
         if (shop == null || code == null || hmac == null || state == null) {
-            throw new ValidateException(ErrorCode.REQUIRED_PARAMETERS_MISSING, "Required parameters missing");
+            throw new ValidateException(ErrorCode.REQUIRED_PARAMETERS_MISSING_OR_INVALID, "Required parameters missing");
         }
         Cookie stateCookie = routingContext.getCookie("state");
         if (stateCookie == null || !state.equals(stateCookie.getValue())) {

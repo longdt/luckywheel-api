@@ -4,9 +4,18 @@ import com.dslplatform.json.CompiledJson;
 
 @CompiledJson
 public class Slide {
+    private Integer index;
     private String label;
     private String discountCode;
     private Float probability;
+
+    public Integer getIndex() {
+        return index;
+    }
+
+    public void setIndex(Integer index) {
+        this.index = index;
+    }
 
     public String getLabel() {
         return label;

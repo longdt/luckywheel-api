@@ -7,7 +7,7 @@ public interface ErrorCode {
     BusinessErrorCode INVALID_HMAC_ERROR =
             new BusinessErrorCode("LW-4001", "Invalid hmac error", 400);
 
-    BusinessErrorCode REQUIRED_PARAMETERS_MISSING =
+    BusinessErrorCode REQUIRED_PARAMETERS_MISSING_OR_INVALID =
             new BusinessErrorCode("LW-4002", "Required parameters missing or invalid", 400);
 
     BusinessErrorCode SHOP_NOT_FOUND =
