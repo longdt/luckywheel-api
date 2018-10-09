@@ -11,7 +11,8 @@ stages:
 
 before_script:
 # - export VERSION=$(date +"%y.%m.%d")
- - export VERSION=$(gradle properties -q | grep "version:" | awk '{print $2}')
+# - export VERSION=$(gradle properties -q | grep "version:" | awk '{print $2}')
+ - export VERSION=$(cat build.gradle | grep "^version" | awk '{print $2}' |  tr -d '"' | tr -d "'")
  - export RANCHER_URL=http://rancher.foxpify.com:8080/
  - export RANCHER_ACCESS_KEY=$R_ACCESS_KEY
  - export RANCHER_SECRET_KEY=$R_SECRET_KEY
