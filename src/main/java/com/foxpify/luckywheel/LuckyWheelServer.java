@@ -12,12 +12,16 @@ import com.foxpify.luckywheel.handler.InstallHandler;
 import com.foxpify.luckywheel.handler.SubscriberHandler;
 import com.foxpify.luckywheel.util.Constant;
 import io.vertx.core.Vertx;
+import io.vertx.core.http.HttpMethod;
 import io.vertx.core.http.HttpServer;
 import io.vertx.core.json.Json;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.handler.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+
+import java.util.HashSet;
+import java.util.Set;
 
 public class LuckyWheelServer {
     private static final Logger logger = LogManager.getLogger(LuckyWheelServer.class);
@@ -37,6 +41,7 @@ public class LuckyWheelServer {
         router.route().handler(CookieHandler.create());
         router.route().handler(BodyHandler.create());
         router.route().failureHandler(ExceptionHandler::handle);
+        initCors(router);
 
         AppComponent appComponent = DaggerAppComponent.builder().appModule(new AppModule(vertx)).build();
         router.route(Constant.ADMIN_SUBROUTE_ENDPOINT + "/*").handler(appComponent.jWTAuthHandler());
@@ -50,6 +55,25 @@ public class LuckyWheelServer {
         port = conf.getHttpPort();
         mainRouter.mountSubRouter(conf.getContextPath(), router);
         server.requestHandler(mainRouter::accept);
+    }
+
+    private void initCors(Router router) {
+        Set<String> allowedHeaders = new HashSet<>();
+        allowedHeaders.add("Access-Control-Allow-Origin");
+        allowedHeaders.add("Origin");
+        allowedHeaders.add("Content-Type");
+        allowedHeaders.add("Accept");
+        allowedHeaders.add("Authorization");
+
+        Set<HttpMethod> allowedMethods = new HashSet<>();
+        allowedMethods.add(HttpMethod.GET);
+        allowedMethods.add(HttpMethod.POST);
+        allowedMethods.add(HttpMethod.OPTIONS);
+        allowedMethods.add(HttpMethod.DELETE);
+        allowedMethods.add(HttpMethod.PATCH);
+        allowedMethods.add(HttpMethod.PUT);
+
+        router.route().handler(CorsHandler.create("*").allowedHeaders(allowedHeaders).allowedMethods(allowedMethods));
     }
 
     private void initInstallRouter(Router router, InstallHandler installHandler) {
