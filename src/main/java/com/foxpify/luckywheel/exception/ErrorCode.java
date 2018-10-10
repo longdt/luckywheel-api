@@ -22,8 +22,8 @@ public interface ErrorCode {
     BusinessErrorCode CAMPAIGN_NOT_FOUND =
             new BusinessErrorCode("LW-4006", "Campaign is not found", 400);
 
-    BusinessErrorCode SLIDE_NOT_FOUND =
-            new BusinessErrorCode("LW-4007", "Slide is not found", 400);
+    BusinessErrorCode SLICE_NOT_FOUND =
+            new BusinessErrorCode("LW-4007", "Slice is not found", 400);
 
     BusinessErrorCode SUBSCRIBER_EXISTS_ERROR =
             new BusinessErrorCode("LW-4008", "subscriber is already exists", 400);

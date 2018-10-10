@@ -37,8 +37,8 @@ public class CampaignServiceImpl implements CampaignService {
     @Override
     public void getCampaign(UUID campaignId, Handler<AsyncResult<Optional<Campaign>>> resultHandler) {
         campaignRepository.find(campaignId).map(campaign -> campaign.map(c -> {
-            if (c.getSlides() != null) {
-                c.getSlides().forEach(s -> s.setDiscountCode(null));
+            if (c.getSlices() != null) {
+                c.getSlices().forEach(s -> s.setDiscountCode(null));
             }
             return c;
         })).setHandler(resultHandler);
@@ -69,9 +69,9 @@ public class CampaignServiceImpl implements CampaignService {
     }
 
     private void setupSlideIndex(Campaign campaign) {
-        if (campaign.getSlides() != null) {
-            for (int i = 0, n = campaign.getSlides().size(); i < n; ++i) {
-                campaign.getSlides().get(i).setIndex(i);
+        if (campaign.getSlices() != null) {
+            for (int i = 0, n = campaign.getSlices().size(); i < n; ++i) {
+                campaign.getSlices().get(i).setIndex(i);
             }
         }
     }
@@ -94,7 +94,7 @@ public class CampaignServiceImpl implements CampaignService {
         Model.copyNonNull(src::getWinProbability, dest::setWinProbability);
         Model.copyNonNull(src::getStartedAt, dest::setStartedAt);
         Model.copyNonNull(src::getCompletedAt, dest::setCompletedAt);
-        Model.copyNonNull(src::getSlides, dest::setSlides);
+        Model.copyNonNull(src::getSlices, dest::setSlices);
         Model.copyNonNull(src::getMetadata, dest::setMetadata);
     }
 

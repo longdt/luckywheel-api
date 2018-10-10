@@ -2,7 +2,7 @@ package com.foxpify.luckywheel.handler;
 
 import com.foxpify.luckywheel.exception.ErrorCode;
 import com.foxpify.luckywheel.exception.ValidateException;
-import com.foxpify.luckywheel.model.entity.Slide;
+import com.foxpify.luckywheel.model.entity.Slice;
 import com.foxpify.luckywheel.model.entity.Subscriber;
 import com.foxpify.luckywheel.model.request.SubscribeRequest;
 import com.foxpify.luckywheel.service.SubscriberService;
@@ -42,9 +42,9 @@ public class SubscriberHandler {
         }
 
         validator.validate(subscribeRequest);
-        subscriberService.subscribe(subscribeRequest, new ResponseHandler<Slide>(routingContext) {
+        subscriberService.subscribe(subscribeRequest, new ResponseHandler<Slice>(routingContext) {
             @Override
-            public void success(Slide result) throws Throwable {
+            public void success(Slice result) throws Throwable {
                 Responses.ok(routingContext, result);
             }
         });

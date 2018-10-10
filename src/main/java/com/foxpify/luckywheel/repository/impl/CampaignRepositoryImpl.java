@@ -2,7 +2,7 @@ package com.foxpify.luckywheel.repository.impl;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.foxpify.luckywheel.model.entity.Campaign;
-import com.foxpify.luckywheel.model.entity.Slide;
+import com.foxpify.luckywheel.model.entity.Slice;
 import com.foxpify.luckywheel.repository.CampaignRepository;
 import com.foxpify.vertxorm.repository.impl.AbstractCrudRepository;
 import com.foxpify.vertxorm.repository.impl.Config;
@@ -28,7 +28,7 @@ public class CampaignRepositoryImpl extends AbstractCrudRepository<UUID, Campaig
                 .addTimestampTzField("updated_at", Campaign::getUpdatedAt, Campaign::setUpdatedAt)
                 .addTimestampTzField("started_at", Campaign::getStartedAt, Campaign::setStartedAt)
                 .addTimestampTzField("completed_at", Campaign::getCompletedAt, Campaign::setCompletedAt)
-                .addJsonField("slides", Campaign::getSlides, Campaign::setSlides, new TypeReference<List<Slide>>() {
+                .addJsonField("slices", Campaign::getSlices, Campaign::setSlices, new TypeReference<List<Slice>>() {
                 })
                 .addJsonField("metadata", Campaign::getMetadata, Campaign::setMetadata, JsonObject.class)
                 .build();

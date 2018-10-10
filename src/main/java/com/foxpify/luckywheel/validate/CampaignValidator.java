@@ -16,8 +16,8 @@ public class CampaignValidator implements Validator<Campaign> {
 
     @Override
     public Campaign validate(Campaign campaign) throws ValidateException {
-        if (campaign.getSlides() != null) {
-            requireNonEmpty(campaign.getSlides(), () -> new ValidateException(ErrorCode.REQUIRED_PARAMETERS_MISSING_OR_INVALID, "slides must be null or none empty"));
+        if (campaign.getSlices() != null) {
+            requireNonEmpty(campaign.getSlices(), () -> new ValidateException(ErrorCode.REQUIRED_PARAMETERS_MISSING_OR_INVALID, "slices must be null or none empty"));
         }
         return campaign;
     }

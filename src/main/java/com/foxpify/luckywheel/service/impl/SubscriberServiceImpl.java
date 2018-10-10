@@ -3,7 +3,7 @@ package com.foxpify.luckywheel.service.impl;
 import com.foxpify.luckywheel.exception.CampaignNotFoundException;
 import com.foxpify.luckywheel.exception.SlideNotFoundException;
 import com.foxpify.luckywheel.model.entity.Campaign;
-import com.foxpify.luckywheel.model.entity.Slide;
+import com.foxpify.luckywheel.model.entity.Slice;
 import com.foxpify.luckywheel.model.entity.Subscriber;
 import com.foxpify.luckywheel.model.request.SubscribeRequest;
 import com.foxpify.luckywheel.repository.SubscriberRepository;
@@ -38,7 +38,7 @@ public class SubscriberServiceImpl implements SubscriberService {
     }
 
     @Override
-    public void subscribe(SubscribeRequest subscribeRequest, Handler<AsyncResult<Slide>> resultHandler) {
+    public void subscribe(SubscribeRequest subscribeRequest, Handler<AsyncResult<Slice>> resultHandler) {
         ObjectHolder<Campaign> holder = new ObjectHolder<>();
         campaignService.getCampaign(subscribeRequest.getCampaignId()).compose(campaignOpt -> {
             Campaign campaign = campaignOpt.orElseThrow(() -> new CampaignNotFoundException("campaign: " + subscribeRequest.getCampaignId() + " is not found"));
@@ -57,27 +57,27 @@ public class SubscriberServiceImpl implements SubscriberService {
         return subscriberRepository.save(subscriber);
     }
 
-    private Slide spinWheel(Campaign campaign) {
-        List<Slide> slides = campaign.getSlides();
-        if (slides == null) {
-            throw new SlideNotFoundException("campaign: " + campaign.getId() + " has no slides");
+    private Slice spinWheel(Campaign campaign) {
+        List<Slice> slices = campaign.getSlices();
+        if (slices == null || slices.isEmpty()) {
+            throw new SlideNotFoundException("campaign: " + campaign.getId() + " has no slices");
         }
         ThreadLocalRandom random = ThreadLocalRandom.current();
         if (random.nextFloat() >= campaign.getWinProbability()) {
-            List<Slide> badSlides = slides.stream().filter(s -> s.getDiscountCode() == null).collect(Collectors.toList());
-            if (!badSlides.isEmpty()) {
-                return badSlides.get(random.nextInt(badSlides.size()));
+            List<Slice> badSlices = slices.stream().filter(s -> s.getDiscountCode() == null).collect(Collectors.toList());
+            if (!badSlices.isEmpty()) {
+                return badSlices.get(random.nextInt(badSlices.size()));
             }
         }
-        List<Slide> luckySlides = slides.stream().filter(s -> s.getDiscountCode() != null).collect(Collectors.toList());
-        if (luckySlides.isEmpty()) {
-            return slides.get(random.nextInt(slides.size()));
+        List<Slice> luckySlices = slices.stream().filter(s -> s.getDiscountCode() != null).collect(Collectors.toList());
+        if (luckySlices.isEmpty()) {
+            return slices.get(random.nextInt(slices.size()));
         }
         int totalGravity = 0;
-        int[] cumulatives = new int[luckySlides.size()];
-        for (int i = 0; i < luckySlides.size(); ++i) {
+        int[] cumulatives = new int[luckySlices.size()];
+        for (int i = 0; i < luckySlices.size(); ++i) {
             cumulatives[i] = totalGravity;
-            totalGravity += luckySlides.get(i).getProbability();
+            totalGravity += luckySlices.get(i).getProbability();
         }
         int randGrav = random.nextInt(totalGravity);
         int index = 0;
@@ -87,7 +87,7 @@ public class SubscriberServiceImpl implements SubscriberService {
                 break;
             }
         }
-        return luckySlides.get(index);
+        return luckySlices.get(index);
     }
 
     @Override

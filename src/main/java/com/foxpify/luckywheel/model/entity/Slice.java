@@ -3,7 +3,7 @@ package com.foxpify.luckywheel.model.entity;
 import com.dslplatform.json.CompiledJson;
 
 @CompiledJson
-public class Slide {
+public class Slice {
     private Integer index;
     private String label;
     private String discountCode;

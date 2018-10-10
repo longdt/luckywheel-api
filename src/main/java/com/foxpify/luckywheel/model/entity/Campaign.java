@@ -19,7 +19,7 @@ public class Campaign {
     private Float winProbability;
     private OffsetDateTime startedAt;
     private OffsetDateTime completedAt;
-    private List<Slide> slides;
+    private List<Slice> slices;
     private JsonObject metadata;
 
     public UUID getId() {
@@ -102,12 +102,12 @@ public class Campaign {
         this.completedAt = completedAt;
     }
 
-    public List<Slide> getSlides() {
-        return slides;
+    public List<Slice> getSlices() {
+        return slices;
     }
 
-    public void setSlides(List<Slide> slides) {
-        this.slides = slides;
+    public void setSlices(List<Slice> slices) {
+        this.slices = slices;
     }
 
     public JsonObject getMetadata() {
