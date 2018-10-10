@@ -93,7 +93,7 @@ public class CampaignHandler {
         } catch (Exception e) {
             throw new ValidateException(ErrorCode.REQUIRED_PARAMETERS_MISSING_OR_INVALID, "require valid campaignId param", e);
         }
-
+        validator.validateUpdate(campaign);
         campaignService.updateCampaign(routingContext.user(), campaign, new ResponseHandler<>(routingContext) {
 
             @Override

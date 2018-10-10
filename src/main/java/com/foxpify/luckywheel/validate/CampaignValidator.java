@@ -9,15 +9,27 @@ import javax.inject.Singleton;
 
 @Singleton
 public class CampaignValidator implements Validator<Campaign> {
-
+    private SliceValidator sliceValidator;
     @Inject
-    public CampaignValidator() {
+    public CampaignValidator(SliceValidator sliceValidator) {
+        this.sliceValidator = sliceValidator;
     }
 
     @Override
     public Campaign validate(Campaign campaign) throws ValidateException {
+        requireNonEmpty(campaign.getName(), () -> new ValidateException(ErrorCode.REQUIRED_PARAMETERS_MISSING_OR_INVALID, "Campaign must has a name"));
         if (campaign.getSlices() != null) {
-            requireNonEmpty(campaign.getSlices(), () -> new ValidateException(ErrorCode.REQUIRED_PARAMETERS_MISSING_OR_INVALID, "slices must be null or none empty"));
+            campaign.getSlices().forEach(sliceValidator::validate);
+        }
+        return campaign;
+    }
+
+    public Campaign validateUpdate(Campaign campaign) throws ValidateException {
+        if (campaign.getName() != null) {
+            requireNonEmpty(campaign.getName(), () -> new ValidateException(ErrorCode.REQUIRED_PARAMETERS_MISSING_OR_INVALID, "Campaign must has a name"));
+        }
+        if (campaign.getSlices() != null) {
+            campaign.getSlices().forEach(sliceValidator::validate);
         }
         return campaign;
     }
