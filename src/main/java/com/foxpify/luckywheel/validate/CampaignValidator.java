@@ -1,8 +1,9 @@
 package com.foxpify.luckywheel.validate;
 
+import com.foxpify.luckywheel.exception.ErrorCode;
 import com.foxpify.luckywheel.exception.ValidateException;
 import com.foxpify.luckywheel.model.entity.Campaign;
-
+import static com.foxpify.luckywheel.validate.Validator.*;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
@@ -15,6 +16,9 @@ public class CampaignValidator implements Validator<Campaign> {
 
     @Override
     public Campaign validate(Campaign campaign) throws ValidateException {
-        return null;
+        if (campaign.getSlides() != null) {
+            requireNonEmpty(campaign.getSlides(), () -> new ValidateException(ErrorCode.REQUIRED_PARAMETERS_MISSING_OR_INVALID, "slides must be null or none empty"));
+        }
+        return campaign;
     }
 }

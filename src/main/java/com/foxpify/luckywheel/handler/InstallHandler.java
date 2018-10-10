@@ -6,6 +6,7 @@ import com.foxpify.luckywheel.exception.ValidateException;
 import com.foxpify.luckywheel.service.InstallService;
 import com.foxpify.luckywheel.util.Constant;
 import com.foxpify.luckywheel.util.Responses;
+import com.foxpify.luckywheel.validate.WebhookValidator;
 import io.vertx.ext.web.Cookie;
 import io.vertx.ext.web.RoutingContext;
 
@@ -16,14 +17,16 @@ import java.util.concurrent.ThreadLocalRandom;
 @Singleton
 public class InstallHandler {
     private InstallService installService;
+    private WebhookValidator validator;
     private String authUrl;
     private String adminUrl;
 
     @Inject
-    public InstallHandler(AppConf appConf, InstallService installService) {
+    public InstallHandler(AppConf appConf, InstallService installService, WebhookValidator validator) {
         this.authUrl = appConf.getHttpHost() + appConf.getContextPath() + Constant.AUTH_ENDPOINT;
         this.adminUrl = appConf.getAdminUrl();
         this.installService = installService;
+        this.validator = validator;
     }
 
     public void install(RoutingContext routingContext) {
@@ -38,11 +41,23 @@ public class InstallHandler {
     }
 
     public void uninstall(RoutingContext routingContext) {
-        String hmac = routingContext.request().getHeader("X-Shopify-Hmac-SHA256");
+        validator.validate(routingContext);
         String shop = routingContext.request().getHeader("X-Shopify-Shop-Domain");
         String topic = routingContext.request().getHeader("X-Shopify-Topic");
         if (Constant.UNINSTALLED_TOPIC.equals(topic)) {
-            installService.uninstall(shop, hmac, routingContext.getBody());
+            installService.uninstall(shop);
+            Responses.ok(routingContext);
+        } else {
+            Responses.badRequest(routingContext);
+        }
+    }
+
+    public void setupTheme(RoutingContext routingContext) {
+        validator.validate(routingContext);
+        String shop = routingContext.request().getHeader("X-Shopify-Shop-Domain");
+        String topic = routingContext.request().getHeader("X-Shopify-Topic");
+        if (Constant.SETUP_THEME_ENDPOINT.equals(topic)) {
+            installService.setupTheme(shop, routingContext.getBodyAsJson().getLong("theme_store_id"));
             Responses.ok(routingContext);
         } else {
             Responses.badRequest(routingContext);

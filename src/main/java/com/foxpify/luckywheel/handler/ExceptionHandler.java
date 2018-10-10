@@ -3,11 +3,14 @@ package com.foxpify.luckywheel.handler;
 import com.foxpify.luckywheel.exception.BusinessException;
 import com.foxpify.luckywheel.exception.ErrorCode;
 import com.foxpify.luckywheel.model.response.ErrorResponse;
+import com.foxpify.luckywheel.util.Constant;
 import com.foxpify.luckywheel.util.Responses;
+import com.github.mauricio.async.db.postgresql.exceptions.GenericDatabaseException;
 import io.vertx.core.json.Json;
 import io.vertx.ext.web.RoutingContext;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import scala.collection.immutable.Map;
 
 public class ExceptionHandler {
     private static final Logger logger = LogManager.getLogger(ExceptionHandler.class);
@@ -21,9 +24,16 @@ public class ExceptionHandler {
     }
 
     public static void handle(RoutingContext routingContext, Throwable cause) {
-        if (!(cause instanceof BusinessException)) {
+        if (cause instanceof GenericDatabaseException) {
+            Map<Object, String> errorInfo = ((GenericDatabaseException) cause).errorMessage().fields();
+            String name = errorInfo.get('n').getOrElse(null);
+            if (Constant.SUBSRIBER_UNIQUE_ERROR.equals(name)) {
+                cause = new BusinessException(ErrorCode.SUBSCRIBER_EXISTS_ERROR, cause.getMessage(), cause);
+            }
+        } else if (!(cause instanceof BusinessException)) {
             cause = new BusinessException(ErrorCode.INTERNAL_SERVER_ERROR, cause.getMessage(), cause);
         }
+
         handleBusinessException(routingContext, (BusinessException) cause);
     }
 

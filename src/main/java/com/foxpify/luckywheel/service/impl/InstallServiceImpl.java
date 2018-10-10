@@ -14,7 +14,6 @@ import com.foxpify.shopifyapi.model.OAuthToken;
 import com.foxpify.shopifyapi.model.Theme;
 import com.foxpify.shopifyapi.util.Futures;
 import io.vertx.core.*;
-import io.vertx.core.buffer.Buffer;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.jwt.JWTAuth;
 import io.vertx.ext.jwt.JWTOptions;
@@ -33,10 +32,12 @@ public class InstallServiceImpl implements InstallService {
     private ShopService shopService;
     private JWTAuth jwtAuth;
     private String uninstalledUrl;
+    private String setupThemeUrl;
 
     @Inject
     public InstallServiceImpl(AppConf appConf, ShopifyClient shopifyClient, ShopService shopService, JWTAuth jwtAuth) {
         this.uninstalledUrl = appConf.getHttpHost() + appConf.getContextPath() + Constant.UNINSTALL_ENDPOINT;
+        this.setupThemeUrl = appConf.getHttpHost() + appConf.getContextPath() + Constant.SETUP_THEME_ENDPOINT;
         this.shopifyClient = shopifyClient;
         this.shopService = shopService;
         this.jwtAuth = jwtAuth;
@@ -58,9 +59,7 @@ public class InstallServiceImpl implements InstallService {
                                 .compose(compositeFuture -> {
                                     Long shopId = compositeFuture.resultAt(0);
                                     OAuthToken authToken = compositeFuture.resultAt(1);
-                                    shopifyClient.newSession(shop, authToken.getAccessToken())
-                                            .createWebhook(Constant.UNINSTALLED_TOPIC, uninstalledUrl,
-                                                    new ErrorLogHandler<>(logger, Level.ERROR, "can't create webhook for shop {}", shop));
+                                    registerWebhooks(shop, authToken.getAccessToken());
                                     Shop s = new Shop(shop, authToken);
                                     s.setId(shopId);
                                     return shopService.createShop(s);
@@ -72,6 +71,14 @@ public class InstallServiceImpl implements InstallService {
         }
     }
 
+    private void registerWebhooks(String shop, String accessToken) {
+        Session session = shopifyClient.newSession(shop, accessToken);
+        session.createWebhook(Constant.UNINSTALLED_TOPIC, uninstalledUrl,
+                        new ErrorLogHandler<>(logger, Level.ERROR, "can't create uninstall webhook for shop {}", shop));
+        session.createWebhook(Constant.PUBLISH_THEMES_TOPIC, setupThemeUrl,
+                new ErrorLogHandler<>(logger, Level.ERROR, "can't create setup theme webhook for shop {}", shop));
+    }
+
     private String generateJwtToken(Long shopId, String shop) {
         JsonObject claims = new JsonObject().put("sub", shopId)
                 .put("shop", shop);
@@ -80,11 +87,13 @@ public class InstallServiceImpl implements InstallService {
     }
 
     @Override
-    public void uninstall(String shop, String hmac, Buffer body, Handler<AsyncResult<Void>> resultHandler) {
-        if (!shopifyClient.verifyData(hmac, body)) {
-            throw new InvalidHmacException("HMAC validation failed");
-        }
+    public void uninstall(String shop, Handler<AsyncResult<Void>> resultHandler) {
         shopService.removeShop(shop).setHandler(resultHandler);
+    }
+
+    @Override
+    public void setupTheme(String shop, Long themeId, Handler<AsyncResult<Void>> resultHandler) {
+
     }
 
     public void createWheelGui(String shop, Handler<AsyncResult<Void>> resultHandler) {

@@ -11,6 +11,7 @@ import com.foxpify.luckywheel.validate.SubscribeRequestValidator;
 import com.foxpify.shopifyapi.util.Json;
 import com.foxpify.vertxorm.util.Page;
 import com.foxpify.vertxorm.util.PageRequest;
+import io.vertx.core.json.DecodeException;
 import io.vertx.ext.web.RoutingContext;
 
 import javax.inject.Inject;
@@ -29,9 +30,17 @@ public class SubscriberHandler {
     }
 
     public void subscribe(RoutingContext routingContext) {
-        UUID campaignId = UUID.fromString(routingContext.request().getParam("campaignId"));
-        SubscribeRequest subscribeRequest = Json.decodeValue(routingContext.getBody(), SubscribeRequest.class);
-        subscribeRequest.setCampaignId(campaignId);
+        SubscribeRequest subscribeRequest;
+        try {
+            UUID campaignId = UUID.fromString(routingContext.request().getParam("campaignId"));
+            subscribeRequest = Json.decodeValue(routingContext.getBody(), SubscribeRequest.class);
+            subscribeRequest.setCampaignId(campaignId);
+        } catch (DecodeException e) {
+            throw new ValidateException(ErrorCode.REQUIRED_PARAMETERS_MISSING_OR_INVALID, "require subscriber request json object", e);
+        } catch (Exception e) {
+            throw new ValidateException(ErrorCode.REQUIRED_PARAMETERS_MISSING_OR_INVALID, "require valid campaignId param", e);
+        }
+
         validator.validate(subscribeRequest);
         subscriberService.subscribe(subscribeRequest, new ResponseHandler<Slide>(routingContext) {
             @Override

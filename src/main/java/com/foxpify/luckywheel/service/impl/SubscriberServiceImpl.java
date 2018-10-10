@@ -1,6 +1,7 @@
 package com.foxpify.luckywheel.service.impl;
 
 import com.foxpify.luckywheel.exception.CampaignNotFoundException;
+import com.foxpify.luckywheel.exception.SlideNotFoundException;
 import com.foxpify.luckywheel.model.entity.Campaign;
 import com.foxpify.luckywheel.model.entity.Slide;
 import com.foxpify.luckywheel.model.entity.Subscriber;
@@ -58,18 +59,27 @@ public class SubscriberServiceImpl implements SubscriberService {
 
     private Slide spinWheel(Campaign campaign) {
         List<Slide> slides = campaign.getSlides();
-        if (ThreadLocalRandom.current().nextFloat() >= campaign.getWinProbability()) {
+        if (slides == null) {
+            throw new SlideNotFoundException("campaign: " + campaign.getId() + " has no slides");
+        }
+        ThreadLocalRandom random = ThreadLocalRandom.current();
+        if (random.nextFloat() >= campaign.getWinProbability()) {
             List<Slide> badSlides = slides.stream().filter(s -> s.getDiscountCode() == null).collect(Collectors.toList());
-            return badSlides.get(ThreadLocalRandom.current().nextInt(badSlides.size()));
+            if (!badSlides.isEmpty()) {
+                return badSlides.get(random.nextInt(badSlides.size()));
+            }
         }
         List<Slide> luckySlides = slides.stream().filter(s -> s.getDiscountCode() != null).collect(Collectors.toList());
+        if (luckySlides.isEmpty()) {
+            return slides.get(random.nextInt(slides.size()));
+        }
         int totalGravity = 0;
         int[] cumulatives = new int[luckySlides.size()];
         for (int i = 0; i < luckySlides.size(); ++i) {
             cumulatives[i] = totalGravity;
             totalGravity += luckySlides.get(i).getProbability();
         }
-        int randGrav = ThreadLocalRandom.current().nextInt(totalGravity);
+        int randGrav = random.nextInt(totalGravity);
         int index = 0;
         for (int i = cumulatives.length - 1; i >= 0; --i) {
             if (cumulatives[i] <= randGrav) {

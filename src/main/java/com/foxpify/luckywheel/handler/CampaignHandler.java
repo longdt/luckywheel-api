@@ -30,7 +30,12 @@ public class CampaignHandler {
     }
 
     public void createCampaign(RoutingContext routingContext) {
-        Campaign campaign = Json.decodeValue(routingContext.getBody(), Campaign.class);
+        Campaign campaign;
+        try {
+            campaign = Json.decodeValue(routingContext.getBody(), Campaign.class);
+        } catch (DecodeException e) {
+            throw new ValidateException(ErrorCode.REQUIRED_PARAMETERS_MISSING_OR_INVALID, "require campaign json object", e);
+        }
         validator.validate(campaign);
         campaignService.createCampaign(routingContext.user(), campaign, new ResponseHandler<Campaign>(routingContext) {
 
@@ -46,7 +51,7 @@ public class CampaignHandler {
         try {
             campaignId = UUID.fromString(routingContext.request().getParam("campaignId"));
         } catch (Exception e) {
-            throw new ValidateException(ErrorCode.REQUIRED_PARAMETERS_MISSING_OR_INVALID, "require valid campaignId param");
+            throw new ValidateException(ErrorCode.REQUIRED_PARAMETERS_MISSING_OR_INVALID, "require valid campaignId param", e);
         }
         campaignService.getCampaign(routingContext.user(), campaignId, new ResponseHandler<Optional<Campaign>>(routingContext) {
 
@@ -84,9 +89,9 @@ public class CampaignHandler {
             campaign = Json.decodeValue(routingContext.getBody(), Campaign.class);
             campaign.setId(campaignId);
         } catch (DecodeException e) {
-            throw new ValidateException(ErrorCode.REQUIRED_PARAMETERS_MISSING_OR_INVALID, "require campaign json object");
+            throw new ValidateException(ErrorCode.REQUIRED_PARAMETERS_MISSING_OR_INVALID, "require campaign json object", e);
         } catch (Exception e) {
-            throw new ValidateException(ErrorCode.REQUIRED_PARAMETERS_MISSING_OR_INVALID, "require valid campaignId param");
+            throw new ValidateException(ErrorCode.REQUIRED_PARAMETERS_MISSING_OR_INVALID, "require valid campaignId param", e);
         }
 
         campaignService.updateCampaign(routingContext.user(), campaign, new ResponseHandler<>(routingContext) {
@@ -103,7 +108,7 @@ public class CampaignHandler {
         try {
             campaignId = UUID.fromString(routingContext.request().getParam("campaignId"));
         } catch (Exception e) {
-            throw new ValidateException(ErrorCode.REQUIRED_PARAMETERS_MISSING_OR_INVALID, "require valid campaignId param");
+            throw new ValidateException(ErrorCode.REQUIRED_PARAMETERS_MISSING_OR_INVALID, "require valid campaignId param", e);
         }
         campaignService.activateCampaign(routingContext.user(), campaignId, new ResponseHandler<>(routingContext) {
 
@@ -119,7 +124,7 @@ public class CampaignHandler {
         try {
             campaignId = UUID.fromString(routingContext.request().getParam("campaignId"));
         } catch (Exception e) {
-            throw new ValidateException(ErrorCode.REQUIRED_PARAMETERS_MISSING_OR_INVALID, "require valid campaignId param");
+            throw new ValidateException(ErrorCode.REQUIRED_PARAMETERS_MISSING_OR_INVALID, "require valid campaignId param", e);
         }
         campaignService.deactivateCampaign(routingContext.user(), campaignId, new ResponseHandler<>(routingContext) {
 
@@ -135,7 +140,7 @@ public class CampaignHandler {
         try {
             campaignId = UUID.fromString(routingContext.request().getParam("campaignId"));
         } catch (Exception e) {
-            throw new ValidateException(ErrorCode.REQUIRED_PARAMETERS_MISSING_OR_INVALID, "require valid campaignId param");
+            throw new ValidateException(ErrorCode.REQUIRED_PARAMETERS_MISSING_OR_INVALID, "require valid campaignId param", e);
         }
         campaignService.deleteCampaign(routingContext.user(), campaignId, new ResponseHandler<Void>(routingContext) {
 

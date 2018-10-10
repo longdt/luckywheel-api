@@ -77,7 +77,7 @@ public class LuckyWheelServer {
 
     private void initSubscriberRouter(Router router, SubscriberHandler subscriberHandler) {
         router.post(Constant.SUBSCRIBE_ENDPOINT).handler(subscriberHandler::subscribe);
-        router.get(Constant.GET_SUBSCRIBERS_ENDPOINT).handler(subscriberHandler::getSubscribers);
+        router.get(Constant.ADMIN_SUBROUTE_ENDPOINT + Constant.GET_SUBSCRIBERS_ENDPOINT).handler(subscriberHandler::getSubscribers);
     }
 
     public void start() {
