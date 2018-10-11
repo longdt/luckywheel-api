@@ -5,9 +5,11 @@ import com.foxpify.luckywheel.exception.ErrorCode;
 import com.foxpify.luckywheel.exception.ValidateException;
 import com.foxpify.luckywheel.model.entity.Campaign;
 import com.foxpify.luckywheel.service.CampaignService;
+import com.foxpify.luckywheel.util.FilterFactory;
 import com.foxpify.luckywheel.util.Responses;
 import com.foxpify.luckywheel.validate.CampaignValidator;
 import com.foxpify.shopifyapi.util.Json;
+import com.foxpify.vertxorm.repository.query.Query;
 import com.foxpify.vertxorm.util.Page;
 import com.foxpify.vertxorm.util.PageRequest;
 import io.vertx.core.json.DecodeException;
@@ -69,8 +71,8 @@ public class CampaignHandler {
             if (page <= 0 || size <= 0) {
                 throw new ValidateException(ErrorCode.REQUIRED_PARAMETERS_MISSING_OR_INVALID, "Page index must start from 1 and size must > 0");
             }
-
-            campaignService.getCampaigns(routingContext.user(), new PageRequest(page, size), new ResponseHandler<Page<Campaign>>(routingContext) {
+            Query<Campaign> filter = FilterFactory.filterCampaign(routingContext.request().params());
+            campaignService.getCampaigns(routingContext.user(), filter, new PageRequest(page, size), new ResponseHandler<Page<Campaign>>(routingContext) {
                 @Override
                 public void success(Page<Campaign> result) {
                     Responses.ok(routingContext, result);

@@ -3,6 +3,7 @@ package com.foxpify.luckywheel.service;
 import com.foxpify.luckywheel.handler.ResponseHandler;
 import com.foxpify.luckywheel.model.entity.Campaign;
 import com.foxpify.shopifyapi.util.Futures;
+import com.foxpify.vertxorm.repository.query.Query;
 import com.foxpify.vertxorm.util.Page;
 import com.foxpify.vertxorm.util.PageRequest;
 import io.vertx.core.AsyncResult;
@@ -26,7 +27,7 @@ public interface CampaignService {
 
     void getCampaign(User user, UUID campaignId, Handler<AsyncResult<Optional<Campaign>>> resultHandler);
 
-    void getCampaigns(User user, PageRequest pageRequest, ResponseHandler<Page<Campaign>> resultHandler);
+    void getCampaigns(User user, Query<Campaign> filter, PageRequest pageRequest, ResponseHandler<Page<Campaign>> resultHandler);
 
     void createCampaign(User user, Campaign campaign, Handler<AsyncResult<Campaign>> resultHandler);
 

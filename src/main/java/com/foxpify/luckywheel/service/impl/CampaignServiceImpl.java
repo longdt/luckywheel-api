@@ -51,9 +51,12 @@ public class CampaignServiceImpl implements CampaignService {
     }
 
     @Override
-    public void getCampaigns(User user, PageRequest pageRequest, ResponseHandler<Page<Campaign>> resultHandler) {
+    public void getCampaigns(User user, Query<Campaign> filter, PageRequest pageRequest, ResponseHandler<Page<Campaign>> resultHandler) {
         Long shopId = user.principal().getLong("sub");
         Query<Campaign> query = equal("shop_id", shopId);
+        if (filter != null) {
+            query = and(query, filter);
+        }
         campaignRepository.findAll(query, pageRequest, resultHandler);
     }
 

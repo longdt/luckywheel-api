@@ -6,9 +6,11 @@ import com.foxpify.luckywheel.model.entity.Slice;
 import com.foxpify.luckywheel.model.entity.Subscriber;
 import com.foxpify.luckywheel.model.request.SubscribeRequest;
 import com.foxpify.luckywheel.service.SubscriberService;
+import com.foxpify.luckywheel.util.FilterFactory;
 import com.foxpify.luckywheel.util.Responses;
 import com.foxpify.luckywheel.validate.SubscribeRequestValidator;
 import com.foxpify.shopifyapi.util.Json;
+import com.foxpify.vertxorm.repository.query.Query;
 import com.foxpify.vertxorm.util.Page;
 import com.foxpify.vertxorm.util.PageRequest;
 import io.vertx.core.json.DecodeException;
@@ -57,8 +59,8 @@ public class SubscriberHandler {
             if (page <= 0 || size <= 0) {
                 throw new ValidateException(ErrorCode.REQUIRED_PARAMETERS_MISSING_OR_INVALID, "Page index must start from 1 and size must > 0");
             }
-
-            subscriberService.getSubscribers(routingContext.user(), new PageRequest(page, size), new ResponseHandler<Page<Subscriber>>(routingContext) {
+            Query<Subscriber> filter = FilterFactory.filterSubscriber(routingContext.request().params());
+            subscriberService.getSubscribers(routingContext.user(), filter, new PageRequest(page, size), new ResponseHandler<Page<Subscriber>>(routingContext) {
                 @Override
                 public void success(Page<Subscriber> result) {
                     Responses.ok(routingContext, result);

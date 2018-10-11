@@ -42,6 +42,10 @@ public class SubscriberServiceImpl implements SubscriberService {
         ObjectHolder<Campaign> holder = new ObjectHolder<>();
         campaignService.getCampaign(subscribeRequest.getCampaignId()).compose(campaignOpt -> {
             Campaign campaign = campaignOpt.orElseThrow(() -> new CampaignNotFoundException("campaign: " + subscribeRequest.getCampaignId() + " is not found"));
+            List<Slice> slices = campaign.getSlices();
+            if (slices == null || slices.isEmpty()) {
+                throw new SlideNotFoundException("campaign: " + campaign.getId() + " has no slices");
+            }
             holder.setValue(campaign);
             return createSubscriber(subscribeRequest, campaign);
         }).map(sub -> spinWheel(holder.getValue())).setHandler(resultHandler);
@@ -59,9 +63,6 @@ public class SubscriberServiceImpl implements SubscriberService {
 
     private Slice spinWheel(Campaign campaign) {
         List<Slice> slices = campaign.getSlices();
-        if (slices == null || slices.isEmpty()) {
-            throw new SlideNotFoundException("campaign: " + campaign.getId() + " has no slices");
-        }
         ThreadLocalRandom random = ThreadLocalRandom.current();
         if (random.nextFloat() >= campaign.getWinProbability()) {
             List<Slice> badSlices = slices.stream().filter(s -> s.getDiscountCode() == null).collect(Collectors.toList());
@@ -91,9 +92,12 @@ public class SubscriberServiceImpl implements SubscriberService {
     }
 
     @Override
-    public void getSubscribers(User user, PageRequest pageRequest, Handler<AsyncResult<Page<Subscriber>>> resultHandler) {
+    public void getSubscribers(User user, Query<Subscriber> filter, PageRequest pageRequest, Handler<AsyncResult<Page<Subscriber>>> resultHandler) {
         Long shopId = user.principal().getLong("sub");
         Query<Subscriber> query = equal("shop_id", shopId);
+        if (filter != null) {
+            query = and(query, filter);
+        }
         subscriberRepository.findAll(query, pageRequest, resultHandler);
     }
 }
