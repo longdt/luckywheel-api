@@ -13,7 +13,6 @@ import com.foxpify.luckywheel.util.ObjectHolder;
 import com.foxpify.vertxorm.repository.query.Query;
 import com.foxpify.vertxorm.util.Page;
 import com.foxpify.vertxorm.util.PageRequest;
-import static com.foxpify.vertxorm.repository.query.QueryFactory.*;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
@@ -26,10 +25,14 @@ import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 
+import static com.foxpify.vertxorm.repository.query.QueryFactory.and;
+import static com.foxpify.vertxorm.repository.query.QueryFactory.equal;
+
 @Singleton
 public class SubscriberServiceImpl implements SubscriberService {
     private CampaignService campaignService;
     private SubscriberRepository subscriberRepository;
+    private static final Query<Subscriber> notDeleted = equal("deleted", false);
 
     @Inject
     public SubscriberServiceImpl(CampaignService campaignService, SubscriberRepository subscriberRepository) {
@@ -92,12 +95,22 @@ public class SubscriberServiceImpl implements SubscriberService {
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public void getSubscribers(User user, Query<Subscriber> filter, PageRequest pageRequest, Handler<AsyncResult<Page<Subscriber>>> resultHandler) {
         Long shopId = user.principal().getLong("sub");
-        Query<Subscriber> query = equal("shop_id", shopId);
+        Query<Subscriber> query;
         if (filter != null) {
-            query = and(query, filter);
+            query = and(equal("shop_id", shopId), notDeleted, filter);
+        } else {
+            query = and(equal("shop_id", shopId), notDeleted);
         }
         subscriberRepository.findAll(query, pageRequest, resultHandler);
+    }
+
+    @Override
+    public void removeSubscriber(User user, String email, Handler<AsyncResult<Void>> resultHandler) {
+        Long shopId = user.principal().getLong("sub");
+        Query<Subscriber> query = and(equal("shop_id", shopId), notDeleted);
+        subscriberRepository.remove(query).map(v -> (Void) null).setHandler(resultHandler);
     }
 }

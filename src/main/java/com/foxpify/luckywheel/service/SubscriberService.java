@@ -14,4 +14,6 @@ public interface SubscriberService {
     void subscribe(SubscribeRequest subscribeRequest, Handler<AsyncResult<Slice>> resultHandler);
 
     void getSubscribers(User user, Query<Subscriber> filter, PageRequest pageRequest, Handler<AsyncResult<Page<Subscriber>>> resultHandler);
+
+    void removeSubscriber(User user, String email, Handler<AsyncResult<Void>> resultHandler);
 }
