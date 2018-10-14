@@ -25,6 +25,7 @@ import static com.foxpify.vertxorm.repository.query.QueryFactory.equal;
 public class ShopServiceImpl implements ShopService {
     private ShopRepository shopRepository;
     private AsyncLoadingCache<String, Shop> tokenByShopCache;
+    private AsyncLoadingCache<Long, Shop> tokenByIdCache;
     private static final Query<Shop> NOT_DELETED = equal("deleted", false);
 
     @Inject
@@ -35,7 +36,23 @@ public class ShopServiceImpl implements ShopService {
                 .expireAfterAccess(10, TimeUnit.HOURS)
                 .buildAsync((shop, executor) -> {
                     Future<Shop> tokenFuture = shopRepository.find(byShop(shop))
-                            .map(tokenOpt -> tokenOpt.orElseThrow(() -> new ShopNotFoundException("DB shop: " + shop)));
+                            .map(shopOpt -> {
+                                Shop s = shopOpt.orElseThrow(() -> new ShopNotFoundException("DB shop: " + shop));
+                                tokenByIdCache.put(s.getId(), CompletableFuture.completedFuture(s));
+                                return s;
+                            });
+                    return Futures.toCompletableFuture(tokenFuture);
+                });
+        tokenByIdCache = Caffeine.newBuilder()
+                .maximumSize(10_000)
+                .expireAfterAccess(10, TimeUnit.HOURS)
+                .buildAsync((shopId, executor) -> {
+                    Future<Shop> tokenFuture = shopRepository.find(byId(shopId))
+                            .map(tokenOpt -> {
+                                Shop s = tokenOpt.orElseThrow(() -> new ShopNotFoundException("DB shopId: " + shopId));
+                                tokenByShopCache.put(s.getShop(), CompletableFuture.completedFuture(s));
+                                return s;
+                            });
                     return Futures.toCompletableFuture(tokenFuture);
                 });
     }
@@ -55,8 +72,7 @@ public class ShopServiceImpl implements ShopService {
 
     @Override
     public Future<Shop> getShop(Long shopId) {
-        return shopRepository.find(byId(shopId))
-                .map(tokenOpt -> tokenOpt.orElseThrow(() -> new ShopNotFoundException("DB shop: " + shopId)));
+        return Futures.toFuture(tokenByIdCache.get(shopId));
     }
 
     @Override
@@ -66,6 +82,7 @@ public class ShopServiceImpl implements ShopService {
         shop.setUpdatedAt(now);
         return shopRepository.save(shop).map(shopToken -> {
             tokenByShopCache.put(shopToken.getShop(), CompletableFuture.completedFuture(shopToken));
+            tokenByIdCache.put(shopToken.getId(), CompletableFuture.completedFuture(shopToken));
             return shopToken;
         });
     }
@@ -86,6 +103,7 @@ public class ShopServiceImpl implements ShopService {
                     s.setDeleted(true);
                     return shopRepository.save(s).map(sh -> {
                         tokenByShopCache.synchronous().invalidate(sh.getShop());
+                        tokenByIdCache.synchronous().invalidate(sh.getId());
                         return (Void) null;
                     });
                 });
