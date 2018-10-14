@@ -26,5 +26,8 @@ public interface ErrorCode {
             new BusinessErrorCode("LW-4007", "Slice is not found", 400);
 
     BusinessErrorCode SUBSCRIBER_EXISTS_ERROR =
-            new BusinessErrorCode("LW-4008", "subscriber is already exists", 400);
+            new BusinessErrorCode("LW-4008", "Subscriber is already exists", 400);
+
+    BusinessErrorCode INVALID_DISCOUNT_CODE =
+            new BusinessErrorCode("LW-4009", "Invalid discount code", 400);
 }

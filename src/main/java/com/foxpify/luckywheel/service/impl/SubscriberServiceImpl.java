@@ -8,8 +8,10 @@ import com.foxpify.luckywheel.model.entity.Subscriber;
 import com.foxpify.luckywheel.model.request.SubscribeRequest;
 import com.foxpify.luckywheel.repository.SubscriberRepository;
 import com.foxpify.luckywheel.service.CampaignService;
+import com.foxpify.luckywheel.service.ShopService;
 import com.foxpify.luckywheel.service.SubscriberService;
 import com.foxpify.luckywheel.util.ObjectHolder;
+import com.foxpify.shopifyapi.client.ShopifyClient;
 import com.foxpify.vertxorm.repository.query.Query;
 import com.foxpify.vertxorm.util.Page;
 import com.foxpify.vertxorm.util.PageRequest;
@@ -30,14 +32,20 @@ import static com.foxpify.vertxorm.repository.query.QueryFactory.equal;
 
 @Singleton
 public class SubscriberServiceImpl implements SubscriberService {
-    private CampaignService campaignService;
-    private SubscriberRepository subscriberRepository;
+    private static final char[] CODE_SEED = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ".toCharArray();
     private static final Query<Subscriber> notDeleted = equal("deleted", false);
+    private CampaignService campaignService;
+    private ShopService shopService;
+    private SubscriberRepository subscriberRepository;
+    private ShopifyClient shopifyClient;
+
 
     @Inject
-    public SubscriberServiceImpl(CampaignService campaignService, SubscriberRepository subscriberRepository) {
+    public SubscriberServiceImpl(CampaignService campaignService, ShopService shopService, SubscriberRepository subscriberRepository, ShopifyClient shopifyClient) {
         this.campaignService = campaignService;
+        this.shopService = shopService;
         this.subscriberRepository = subscriberRepository;
+        this.shopifyClient = shopifyClient;
     }
 
     @Override
@@ -51,7 +59,35 @@ public class SubscriberServiceImpl implements SubscriberService {
             }
             holder.setValue(campaign);
             return createSubscriber(subscribeRequest, campaign);
-        }).map(sub -> spinWheel(holder.getValue())).setHandler(resultHandler);
+        })
+                .map(sub -> spinWheel(holder.getValue()))
+                .compose(slice -> {
+                    if (slice.isAuto()) {
+                        return generateDiscountCode(holder.getValue().getShopId(), slice);
+                    }
+                    return Future.succeededFuture(slice);
+                })
+                .setHandler(resultHandler);
+    }
+
+    private String randCode() {
+        StringBuilder code = new StringBuilder("WL");
+        ThreadLocalRandom rand = ThreadLocalRandom.current();
+        for (int i = 0; i < 10; ++i) {
+            code.append(CODE_SEED[rand.nextInt(CODE_SEED.length)]);
+        }
+        return code.toString();
+    }
+
+    private Future<Slice> generateDiscountCode(Long shopId, Slice slice) {
+        String code = randCode();
+        return shopService.getShop(shopId)
+                .map(shop -> shopifyClient.newSession(shop.getShop(), shop.getAccessToken()))
+                .compose(session -> session.createDiscountCode(slice.getPriceRuleId(), code, 1))
+                .map(discount -> {
+                    slice.setDiscountCode(code);
+                    return slice;
+                });
     }
 
     private Future<Subscriber> createSubscriber(SubscribeRequest subscribeRequest, Campaign campaign) {
@@ -67,7 +103,9 @@ public class SubscriberServiceImpl implements SubscriberService {
     private Slice spinWheel(Campaign campaign) {
         List<Slice> slices = campaign.getSlices();
         ThreadLocalRandom random = ThreadLocalRandom.current();
-        if (random.nextFloat() >= campaign.getWinProbability()) {
+        if (campaign.getWinProbability() == null) {
+            return slices.get(random.nextInt(slices.size()));
+        } else if (random.nextFloat() >= campaign.getWinProbability()) {
             List<Slice> badSlices = slices.stream().filter(s -> s.getDiscountCode() == null).collect(Collectors.toList());
             if (!badSlices.isEmpty()) {
                 return badSlices.get(random.nextInt(badSlices.size()));

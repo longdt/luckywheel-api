@@ -7,7 +7,9 @@ public class Slice {
     private Integer index;
     private String label;
     private String discountCode;
+    private Long priceRuleId;
     private Float probability;
+    private boolean auto;
 
     public Integer getIndex() {
         return index;
@@ -33,11 +35,27 @@ public class Slice {
         this.discountCode = discountCode;
     }
 
+    public Long getPriceRuleId() {
+        return priceRuleId;
+    }
+
+    public void setPriceRuleId(Long priceRuleId) {
+        this.priceRuleId = priceRuleId;
+    }
+
     public Float getProbability() {
         return probability;
     }
 
     public void setProbability(Float probability) {
         this.probability = probability;
+    }
+
+    public boolean isAuto() {
+        return auto;
+    }
+
+    public void setAuto(boolean auto) {
+        this.auto = auto;
     }
 }

@@ -1,15 +1,25 @@
 package com.foxpify.luckywheel.service.impl;
 
+import com.foxpify.luckywheel.exception.BusinessException;
 import com.foxpify.luckywheel.exception.CampaignNotFoundException;
+import com.foxpify.luckywheel.exception.ErrorCode;
+import com.foxpify.luckywheel.exception.ValidateException;
 import com.foxpify.luckywheel.handler.ResponseHandler;
 import com.foxpify.luckywheel.model.entity.Campaign;
+import com.foxpify.luckywheel.model.entity.Slice;
 import com.foxpify.luckywheel.repository.CampaignRepository;
 import com.foxpify.luckywheel.service.CampaignService;
+import com.foxpify.luckywheel.service.ShopService;
 import com.foxpify.luckywheel.util.Model;
+import com.foxpify.shopifyapi.client.ShopifyClient;
+import com.foxpify.shopifyapi.exception.ShopifyException;
+import com.foxpify.shopifyapi.model.DiscountCode;
 import com.foxpify.vertxorm.repository.query.Query;
 import com.foxpify.vertxorm.util.Page;
 import com.foxpify.vertxorm.util.PageRequest;
 import io.vertx.core.AsyncResult;
+import io.vertx.core.CompositeFuture;
+import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.ext.auth.User;
 import org.apache.logging.log4j.LogManager;
@@ -18,8 +28,8 @@ import org.apache.logging.log4j.Logger;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.time.OffsetDateTime;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import static com.foxpify.vertxorm.repository.query.QueryFactory.and;
 import static com.foxpify.vertxorm.repository.query.QueryFactory.equal;
@@ -28,20 +38,19 @@ import static com.foxpify.vertxorm.repository.query.QueryFactory.equal;
 public class CampaignServiceImpl implements CampaignService {
     private static final Logger logger = LogManager.getLogger(InstallServiceImpl.class);
     private CampaignRepository campaignRepository;
+    private ShopService shopService;
+    private ShopifyClient shopifyClient;
 
     @Inject
-    public CampaignServiceImpl(CampaignRepository campaignRepository) {
+    public CampaignServiceImpl(CampaignRepository campaignRepository, ShopService shopService, ShopifyClient shopifyClient) {
         this.campaignRepository = campaignRepository;
+        this.shopService = shopService;
+        this.shopifyClient = shopifyClient;
     }
 
     @Override
     public void getCampaign(UUID campaignId, Handler<AsyncResult<Optional<Campaign>>> resultHandler) {
-        campaignRepository.find(campaignId).map(campaign -> campaign.map(c -> {
-            if (c.getSlices() != null) {
-                c.getSlices().forEach(s -> s.setDiscountCode(null));
-            }
-            return c;
-        })).setHandler(resultHandler);
+        campaignRepository.find(campaignId, resultHandler);
     }
 
     @Override
@@ -67,16 +76,45 @@ public class CampaignServiceImpl implements CampaignService {
         OffsetDateTime now = OffsetDateTime.now();
         campaign.setCreatedAt(now);
         campaign.setUpdatedAt(now);
-        setupSlideIndex(campaign);
-        campaignRepository.save(campaign, resultHandler);
+        setupSlides(campaign).compose(campaignRepository::insert).setHandler(resultHandler);
     }
 
-    private void setupSlideIndex(Campaign campaign) {
-        if (campaign.getSlices() != null) {
-            for (int i = 0, n = campaign.getSlices().size(); i < n; ++i) {
-                campaign.getSlices().get(i).setIndex(i);
-            }
+    private Future<Campaign> setupSlides(Campaign campaign) {
+        if (campaign.getSlices() == null || campaign.getSlices().isEmpty()) {
+            return Future.succeededFuture(campaign);
         }
+        for (int i = 0, n = campaign.getSlices().size(); i < n; ++i) {
+            campaign.getSlices().get(i).setIndex(i);
+        }
+        Set<String> codes = campaign.getSlices().stream()
+                .map(Slice::getDiscountCode)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toSet());
+        if (codes.isEmpty()) {
+            return Future.succeededFuture(campaign);
+        }
+        return shopService.getShop(campaign.getShopId())
+                .map(shop -> shopifyClient.newSession(shop.getShop(), shop.getAccessToken()))
+                .compose(session -> {
+                    List<Future> discountCodes = codes.stream()
+                            .map(code -> session.searchDiscountCode(code, false).otherwise(t -> {
+                                if (t instanceof ShopifyException) {
+                                    throw new ValidateException(ErrorCode.INVALID_DISCOUNT_CODE, "discode code: '" + code + "' is invalid");
+                                }
+                                throw new BusinessException(ErrorCode.INTERNAL_SERVER_ERROR, "can't get discount code: '" + code + "'");
+                            }))
+                            .collect(Collectors.toList());
+                    return CompositeFuture.all(discountCodes);
+                })
+                .map(discountCodes -> {
+                    Map<String, Long> priceRules = new HashMap<>();
+                    for (int i = 0; i < discountCodes.size(); ++i) {
+                        DiscountCode discountCode = discountCodes.resultAt(i);
+                        priceRules.put(discountCode.getCode(), discountCode.getPriceRuleId());
+                    }
+                    campaign.getSlices().forEach(slice -> slice.setPriceRuleId(priceRules.get(slice.getDiscountCode())));
+                    return campaign;
+                });
     }
 
     @Override
@@ -84,9 +122,8 @@ public class CampaignServiceImpl implements CampaignService {
         getCampaign(user, campaign.getId()).compose(campaignOpt -> {
             Campaign origin = campaignOpt.orElseThrow(() -> new CampaignNotFoundException("campaign " + campaign.getId() + " is not found"));
             copyNonNull(campaign, origin);
-            setupSlideIndex(origin);
             origin.setUpdatedAt(OffsetDateTime.now());
-            return campaignRepository.update(origin);
+            return setupSlides(origin).compose(campaignRepository::update);
         }).setHandler(resultHandler);
     }
 

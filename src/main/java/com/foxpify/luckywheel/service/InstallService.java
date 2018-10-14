@@ -5,10 +5,9 @@ import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.MultiMap;
-import io.vertx.core.buffer.Buffer;
 
 public interface InstallService {
-    String APP_SCOPES = "read_themes,write_themes";
+    String APP_SCOPES = "read_themes,write_themes,read_price_rules,write_price_rules";
 
     String install(String shop, String authUrl);
 
