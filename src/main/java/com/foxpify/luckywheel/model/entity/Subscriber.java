@@ -12,6 +12,7 @@ public class Subscriber {
     private UUID campaignId;
     private String fullName;
     private String email;
+    private String discountCode;
     private OffsetDateTime createdAt;
 
     public Long getId() {
@@ -56,6 +57,14 @@ public class Subscriber {
 
     public OffsetDateTime getCreatedAt() {
         return createdAt;
+    }
+
+    public String getDiscountCode() {
+        return discountCode;
+    }
+
+    public void setDiscountCode(String discountCode) {
+        this.discountCode = discountCode;
     }
 
     public void setCreatedAt(OffsetDateTime createdAt) {

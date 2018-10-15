@@ -50,22 +50,22 @@ public class SubscriberServiceImpl implements SubscriberService {
 
     @Override
     public void subscribe(SubscribeRequest subscribeRequest, Handler<AsyncResult<Slice>> resultHandler) {
-        ObjectHolder<Campaign> holder = new ObjectHolder<>();
-        campaignService.getCampaign(subscribeRequest.getCampaignId()).compose(campaignOpt -> {
+        ObjectHolder<Long> holder = new ObjectHolder<>();
+        campaignService.getCampaign(subscribeRequest.getCampaignId()).map(campaignOpt -> {
             Campaign campaign = campaignOpt.orElseThrow(() -> new CampaignNotFoundException("campaign: " + subscribeRequest.getCampaignId() + " is not found"));
             List<Slice> slices = campaign.getSlices();
             if (slices == null || slices.isEmpty()) {
                 throw new SlideNotFoundException("campaign: " + campaign.getId() + " has no slices");
             }
-            holder.setValue(campaign);
-            return createSubscriber(subscribeRequest, campaign);
+            holder.setValue(campaign.getShopId());
+            return spinWheel(campaign);
         })
-                .map(sub -> spinWheel(holder.getValue()))
                 .compose(slice -> {
-                    if (slice.isAuto()) {
-                        return generateDiscountCode(holder.getValue().getShopId(), slice);
+                    Future<Subscriber> subscriber = createSubscriber(subscribeRequest, holder.getValue(), slice.getDiscountCode());
+                    if (slice.getPriceRuleId() != null && slice.isAuto()) {
+                        return subscriber.compose(sub -> generateDiscountCode(holder.getValue(), slice));
                     }
-                    return Future.succeededFuture(slice);
+                    return subscriber.map(slice);
                 })
                 .setHandler(resultHandler);
     }
@@ -90,13 +90,14 @@ public class SubscriberServiceImpl implements SubscriberService {
                 });
     }
 
-    private Future<Subscriber> createSubscriber(SubscribeRequest subscribeRequest, Campaign campaign) {
+    private Future<Subscriber> createSubscriber(SubscribeRequest subscribeRequest, Long shopId, String discountCode) {
         Subscriber subscriber = new Subscriber();
         subscriber.setCampaignId(subscribeRequest.getCampaignId());
         subscriber.setFullName(subscribeRequest.getFullName());
         subscriber.setEmail(subscribeRequest.getEmail());
         subscriber.setCreatedAt(OffsetDateTime.now());
-        subscriber.setShopId(campaign.getShopId());
+        subscriber.setShopId(shopId);
+        subscriber.setDiscountCode(discountCode);
         return subscriberRepository.save(subscriber);
     }
 

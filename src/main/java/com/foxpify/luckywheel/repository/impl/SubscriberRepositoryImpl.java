@@ -22,6 +22,7 @@ public class SubscriberRepositoryImpl  extends AbstractCrudRepository<Long, Subs
                 .addUuidField("campaign_id", Subscriber::getCampaignId, Subscriber::setCampaignId)
                 .addField("full_name", Subscriber::getFullName, Subscriber::setFullName)
                 .addField("email", Subscriber::getEmail, Subscriber::setEmail)
+                .addField("discount_code", Subscriber::getDiscountCode, Subscriber::setDiscountCode)
                 .addTimestampTzField("created_at", Subscriber::getCreatedAt, Subscriber::setCreatedAt)
                 .build();
         init(sqlClient, conf);
