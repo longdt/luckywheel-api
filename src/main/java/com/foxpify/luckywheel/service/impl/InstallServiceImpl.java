@@ -2,6 +2,7 @@ package com.foxpify.luckywheel.service.impl;
 
 import com.foxpify.luckywheel.conf.AppConf;
 import com.foxpify.luckywheel.exception.InvalidHmacException;
+import com.foxpify.luckywheel.exception.ShopNotFoundException;
 import com.foxpify.luckywheel.model.entity.Shop;
 import com.foxpify.luckywheel.service.InstallService;
 import com.foxpify.luckywheel.service.ShopService;
@@ -54,6 +55,9 @@ public class InstallServiceImpl implements InstallService {
             shopService.getShop(shop)
                     .map(Shop::getId)
                     .recover(t -> {
+                        if (!(t instanceof ShopNotFoundException)) {
+                            return Future.failedFuture(t);
+                        }
                         CompletableFuture<Long> shopIdFuture = Futures.toCompletableFuture(shopService::nextId);
                         CompositeFuture.all(Futures.toFuture(shopIdFuture), shopifyClient.requestToken(shop, code))
                                 .compose(compositeFuture -> {
