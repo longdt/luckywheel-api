@@ -88,6 +88,9 @@ public class CampaignServiceImpl implements CampaignService {
         OffsetDateTime now = OffsetDateTime.now();
         campaign.setCreatedAt(now);
         campaign.setUpdatedAt(now);
+        if (campaign.getActive() == null) {
+            campaign.setActive(true);
+        }
         setupSlides(campaign).compose(campaignRepository::insert).setHandler(resultHandler);
     }
 
