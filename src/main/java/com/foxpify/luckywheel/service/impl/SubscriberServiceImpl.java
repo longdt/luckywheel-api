@@ -140,7 +140,7 @@ public class SubscriberServiceImpl implements SubscriberService {
         Long shopId = user.principal().getLong("sub");
         Query<Subscriber> query;
         if (filter != null) {
-            query = and(equal("shop_id", shopId), notDeleted, filter);
+            query = and(equal("shop_id", shopId), notDeleted, filter).orderBy(filter.orderBy());
         } else {
             query = and(equal("shop_id", shopId), notDeleted);
         }

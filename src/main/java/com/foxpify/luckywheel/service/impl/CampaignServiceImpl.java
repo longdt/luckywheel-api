@@ -76,7 +76,7 @@ public class CampaignServiceImpl implements CampaignService {
         Long shopId = user.principal().getLong("sub");
         Query<Campaign> query = equal("shop_id", shopId);
         if (filter != null) {
-            query = and(query, filter);
+            query = and(query, filter).orderBy(filter.orderBy());
         }
         campaignRepository.findAll(query, pageRequest, resultHandler);
     }
