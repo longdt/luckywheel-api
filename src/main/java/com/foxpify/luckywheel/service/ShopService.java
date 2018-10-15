@@ -13,6 +13,8 @@ public interface ShopService {
 
     Future<Shop> createShop(Shop shop);
 
+    Future<Shop> updateShop(Shop shop);
+
     default Future<Long> nextId() {
         return Futures.toFuture(this::nextId);
     }

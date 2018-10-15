@@ -80,11 +80,21 @@ public class ShopServiceImpl implements ShopService {
         OffsetDateTime now = OffsetDateTime.now();
         shop.setCreatedAt(now);
         shop.setUpdatedAt(now);
+        return save(shop);
+    }
+
+    private Future<Shop> save(Shop shop) {
         return shopRepository.save(shop).map(shopToken -> {
             tokenByShopCache.put(shopToken.getShop(), CompletableFuture.completedFuture(shopToken));
             tokenByIdCache.put(shopToken.getId(), CompletableFuture.completedFuture(shopToken));
             return shopToken;
         });
+    }
+
+    @Override
+    public Future<Shop> updateShop(Shop shop) {
+        shop.setUpdatedAt(OffsetDateTime.now());
+        return save(shop);
     }
 
     @Override

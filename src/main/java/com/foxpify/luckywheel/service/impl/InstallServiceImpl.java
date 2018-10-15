@@ -53,7 +53,10 @@ public class InstallServiceImpl implements InstallService {
     public void auth(String shop, String code, String hmac, MultiMap params, Handler<AsyncResult<String>> resultHandler) {
         if (shopifyClient.verifyRequest(hmac, params)) {
             shopService.getShop(shop)
-                    .map(Shop::getId)
+                    .map(s -> {
+                        updateAccessTokenIfNeed(s, shop, code);
+                        return s.getId();
+                    })
                     .recover(t -> {
                         if (!(t instanceof ShopNotFoundException)) {
                             return Future.failedFuture(t);
@@ -73,6 +76,16 @@ public class InstallServiceImpl implements InstallService {
         } else {
             throw new InvalidHmacException("HMAC validation failed");
         }
+    }
+
+    private void updateAccessTokenIfNeed(Shop shop, String shopDomain, String code) {
+        shopifyClient.requestToken(shopDomain, code).compose(authToken -> {
+            if (!shop.getAccessToken().equals(authToken.getAccessToken())) {
+                shop.setAccessToken(authToken.getAccessToken());
+                return shopService.updateShop(shop);
+            }
+            return Future.succeededFuture();
+        });
     }
 
     private void registerWebhooks(String shop, String accessToken) {
