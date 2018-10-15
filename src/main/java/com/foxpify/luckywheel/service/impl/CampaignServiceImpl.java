@@ -33,6 +33,7 @@ import java.util.stream.Collectors;
 
 import static com.foxpify.vertxorm.repository.query.QueryFactory.and;
 import static com.foxpify.vertxorm.repository.query.QueryFactory.equal;
+import static com.foxpify.vertxorm.repository.query.QueryFactory.in;
 
 @Singleton
 public class CampaignServiceImpl implements CampaignService {
@@ -51,6 +52,17 @@ public class CampaignServiceImpl implements CampaignService {
     @Override
     public void getCampaign(UUID campaignId, Handler<AsyncResult<Optional<Campaign>>> resultHandler) {
         campaignRepository.find(campaignId, resultHandler);
+    }
+
+    @Override
+    public void getCampaigns(Collection<UUID> campaignIds, Handler<AsyncResult<List<Campaign>>> resultHandler) {
+        if (campaignIds.isEmpty()) {
+            resultHandler.handle(Future.succeededFuture(Collections.emptyList()));
+            return;
+        }
+        List<String> ids = campaignIds.stream().map(UUID::toString).collect(Collectors.toList());
+        Query<Campaign> query = in("id", ids);
+        campaignRepository.findAll(query, resultHandler);
     }
 
     @Override
