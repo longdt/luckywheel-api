@@ -10,6 +10,7 @@ public class Subscriber {
     private Long id;
     private Long shopId;
     private UUID campaignId;
+    private String campaignName;
     private String fullName;
     private String email;
     private String discountCode;
@@ -37,6 +38,14 @@ public class Subscriber {
 
     public void setCampaignId(UUID campaignId) {
         this.campaignId = campaignId;
+    }
+
+    public String getCampaignName() {
+        return campaignName;
+    }
+
+    public void setCampaignName(String campaignName) {
+        this.campaignName = campaignName;
     }
 
     public String getFullName() {

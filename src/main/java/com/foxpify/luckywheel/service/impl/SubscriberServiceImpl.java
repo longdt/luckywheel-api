@@ -50,20 +50,20 @@ public class SubscriberServiceImpl implements SubscriberService {
 
     @Override
     public void subscribe(SubscribeRequest subscribeRequest, Handler<AsyncResult<Slice>> resultHandler) {
-        ObjectHolder<Long> holder = new ObjectHolder<>();
+        ObjectHolder<Campaign> holder = new ObjectHolder<>();
         campaignService.getCampaign(subscribeRequest.getCampaignId()).map(campaignOpt -> {
             Campaign campaign = campaignOpt.orElseThrow(() -> new CampaignNotFoundException("campaign: " + subscribeRequest.getCampaignId() + " is not found"));
             List<Slice> slices = campaign.getSlices();
             if (slices == null || slices.isEmpty()) {
                 throw new SlideNotFoundException("campaign: " + campaign.getId() + " has no slices");
             }
-            holder.setValue(campaign.getShopId());
+            holder.setValue(campaign);
             return spinWheel(campaign);
         })
                 .compose(slice -> {
                     Future<Subscriber> subscriber = createSubscriber(subscribeRequest, holder.getValue(), slice.getDiscountCode());
                     if (slice.getPriceRuleId() != null && slice.isAuto()) {
-                        return subscriber.compose(sub -> generateDiscountCode(holder.getValue(), slice));
+                        return subscriber.compose(sub -> generateDiscountCode(holder.getValue().getShopId(), slice));
                     }
                     return subscriber.map(slice);
                 })
@@ -90,13 +90,14 @@ public class SubscriberServiceImpl implements SubscriberService {
                 });
     }
 
-    private Future<Subscriber> createSubscriber(SubscribeRequest subscribeRequest, Long shopId, String discountCode) {
+    private Future<Subscriber> createSubscriber(SubscribeRequest subscribeRequest, Campaign campaign, String discountCode) {
         Subscriber subscriber = new Subscriber();
         subscriber.setCampaignId(subscribeRequest.getCampaignId());
+        subscriber.setCampaignName(campaign.getName());
         subscriber.setFullName(subscribeRequest.getFullName());
         subscriber.setEmail(subscribeRequest.getEmail());
         subscriber.setCreatedAt(OffsetDateTime.now());
-        subscriber.setShopId(shopId);
+        subscriber.setShopId(campaign.getShopId());
         subscriber.setDiscountCode(discountCode);
         return subscriberRepository.save(subscriber);
     }

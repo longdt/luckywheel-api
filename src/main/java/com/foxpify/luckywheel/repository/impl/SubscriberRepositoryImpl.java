@@ -20,6 +20,7 @@ public class SubscriberRepositoryImpl  extends AbstractCrudRepository<Long, Subs
                 .pk("id", Subscriber::getId, Subscriber::setId, true)
                 .addField("shop_id", Subscriber::getShopId, Subscriber::setShopId)
                 .addUuidField("campaign_id", Subscriber::getCampaignId, Subscriber::setCampaignId)
+                .addField("campaign_name", Subscriber::getCampaignName, Subscriber::setCampaignName)
                 .addField("full_name", Subscriber::getFullName, Subscriber::setFullName)
                 .addField("email", Subscriber::getEmail, Subscriber::setEmail)
                 .addField("discount_code", Subscriber::getDiscountCode, Subscriber::setDiscountCode)

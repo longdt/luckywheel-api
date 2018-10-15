@@ -23,6 +23,7 @@ public class FilterFactory {
         subQueries.add(query("email", params.get("email"), QueryFactory::equal));
         subQueries.add(query("full_name", params.get("fullName"), QueryFactory::equal));
         subQueries.add(query("campaign_id", params.get("campaignId"), QueryFactory::equal));
+        subQueries.add(query("campaign_name", params.get("campaignName"), QueryFactory::equal));
         subQueries.add(query("id", params.get("id"), QueryFactory::equal));
         return buildQuery(subQueries);
     }
