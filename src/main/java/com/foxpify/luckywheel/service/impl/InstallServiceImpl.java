@@ -60,7 +60,12 @@ public class InstallServiceImpl implements InstallService {
         if (shopifyClient.verifyRequest(hmac, params)) {
             shopService.getShop(shop)
                     .map(s -> {
-                        updateAccessTokenIfNeed(s, shop, code);
+                        updateAccessTokenIfNeed(s, shop, code).map(updatedShop -> {
+                            if (updatedShop != null) {
+                                registerWebhooks(shop, updatedShop.getAccessToken());
+                            }
+                            return null;
+                        });
                         return s.getId();
                     })
                     .recover(t -> {
@@ -84,8 +89,8 @@ public class InstallServiceImpl implements InstallService {
         }
     }
 
-    private void updateAccessTokenIfNeed(Shop shop, String shopDomain, String code) {
-        shopifyClient.requestToken(shopDomain, code).compose(authToken -> {
+    private Future<Shop> updateAccessTokenIfNeed(Shop shop, String shopDomain, String code) {
+        return shopifyClient.requestToken(shopDomain, code).compose(authToken -> {
             if (!shop.getAccessToken().equals(authToken.getAccessToken())) {
                 shop.setAccessToken(authToken.getAccessToken());
                 return shopService.updateShop(shop);
