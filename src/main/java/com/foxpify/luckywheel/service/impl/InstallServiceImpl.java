@@ -112,8 +112,9 @@ public class InstallServiceImpl implements InstallService {
         ObjectHolder<String> accessTokenHolder = new ObjectHolder<>();
         shopService.getShop(shop)
                 .compose(s -> {
-                    accessTokenHolder.setValue(s.getAccessToken());
-                    return testAccessToken(s.getShop(), s.getAccessToken());
+                    String accessToken = s.getAccessToken();
+                    accessTokenHolder.setValue(accessToken);
+                    return testAccessToken(s.getShop(), accessToken);
                 })
                 .recover(t -> {
                     if (t instanceof ShopNotFoundException) {

@@ -37,7 +37,7 @@ import static com.foxpify.vertxorm.repository.query.QueryFactory.in;
 
 @Singleton
 public class CampaignServiceImpl implements CampaignService {
-    private static final Logger logger = LogManager.getLogger(InstallServiceImpl.class);
+    private static final Logger logger = LogManager.getLogger(CampaignServiceImpl.class);
     private CampaignRepository campaignRepository;
     private ShopService shopService;
     private ShopifyClient shopifyClient;

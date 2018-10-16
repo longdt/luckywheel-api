@@ -12,6 +12,8 @@ import com.github.benmanes.caffeine.cache.Caffeine;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -24,6 +26,7 @@ import static com.foxpify.vertxorm.repository.query.QueryFactory.equal;
 
 @Singleton
 public class ShopServiceImpl implements ShopService {
+    private static final Logger logger = LogManager.getLogger(ShopServiceImpl.class);
     private ShopRepository shopRepository;
     private AsyncLoadingCache<String, Shop> tokenByShopCache;
     private AsyncLoadingCache<Long, Shop> tokenByIdCache;
@@ -108,7 +111,9 @@ public class ShopServiceImpl implements ShopService {
     public Future<Void> removeShop(String shop, String accessToken) {
         return shopRepository.remove(shop, QueryFactory.equal("access_token", accessToken))
                 .map(shopOpt -> {
-                    clearCache(shopOpt.orElseThrow(() -> new ShopNotFoundException("can't remove shop: " + shop + " with accessToken: " + accessToken)));
+                    Shop s = shopOpt.orElseThrow(() -> new ShopNotFoundException("can't remove shop: " + shop + " with accessToken: " + accessToken));
+                    clearCache(s);
+                    logger.info("remove shop (id: {}, shop: {}, accessToken: {})", s.getId(), s.getShop(), s.getAccessToken());
                     return null;
                 });
     }
