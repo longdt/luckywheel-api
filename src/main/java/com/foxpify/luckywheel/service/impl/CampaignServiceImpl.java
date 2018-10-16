@@ -91,6 +91,9 @@ public class CampaignServiceImpl implements CampaignService {
         if (campaign.getActive() == null) {
             campaign.setActive(true);
         }
+        if (campaign.getStartedAt() == null) {
+            campaign.setStartedAt(now);
+        }
         setupSlides(campaign).compose(campaignRepository::insert).setHandler(resultHandler);
     }
 

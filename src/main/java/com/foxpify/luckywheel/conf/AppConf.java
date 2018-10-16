@@ -1,5 +1,6 @@
 package com.foxpify.luckywheel.conf;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import io.vertx.core.json.JsonObject;
 
 public class AppConf {
@@ -9,6 +10,8 @@ public class AppConf {
     private String appKey;
     private String appSecret;
     private String adminUrl;
+    @JsonProperty("jwt.token.expiresInSeconds")
+    private int jwtExpiresInSeconds;
     private JsonObject jsonObject;
 
     public AppConf() {
@@ -77,6 +80,14 @@ public class AppConf {
 
     public void setAdminUrl(String adminUrl) {
         this.adminUrl = adminUrl;
+    }
+
+    public int getJwtExpiresInSeconds() {
+        return jwtExpiresInSeconds;
+    }
+
+    public void setJwtExpiresInSeconds(int jwtExpiresInSeconds) {
+        this.jwtExpiresInSeconds = jwtExpiresInSeconds;
     }
 
     public void setAppSecret(String appSecret) {

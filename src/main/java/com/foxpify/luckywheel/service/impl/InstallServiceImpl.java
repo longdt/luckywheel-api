@@ -38,6 +38,7 @@ public class InstallServiceImpl implements InstallService {
     private JWTAuth jwtAuth;
     private String uninstalledUrl;
     private String setupThemeUrl;
+    private final JWTOptions options;
 
     @Inject
     public InstallServiceImpl(AppConf appConf, ShopifyClient shopifyClient, ShopService shopService, JWTAuth jwtAuth) {
@@ -46,6 +47,7 @@ public class InstallServiceImpl implements InstallService {
         this.shopifyClient = shopifyClient;
         this.shopService = shopService;
         this.jwtAuth = jwtAuth;
+        this.options = new JWTOptions().setExpiresInSeconds(appConf.getJwtExpiresInSeconds());
     }
 
     @Override
@@ -103,7 +105,6 @@ public class InstallServiceImpl implements InstallService {
     private String generateJwtToken(Long shopId, String shop) {
         JsonObject claims = new JsonObject().put("sub", shopId)
                 .put("shop", shop);
-        JWTOptions options = new JWTOptions();
         return jwtAuth.generateToken(claims, options);
     }
 

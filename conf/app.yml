@@ -8,7 +8,7 @@ jwt.auth.options:
     type: jceks
     path: conf/keystore.jceks
     password: ETP7nZoLTXLQxZUrgBgrHOpA+cYRLHcQ2tPGWwvd0eo=
-
+jwt.token.expiresInSeconds: 86400
 adminUrl: https://hoant.foxpify.com/#/authentication
 datasource:
   host: postgres.db.foxpify.com
