@@ -4,6 +4,9 @@ public interface ErrorCode {
     BusinessErrorCode INTERNAL_SERVER_ERROR =
             new BusinessErrorCode("LW-5001", "Internal server error", 500);
 
+    BusinessErrorCode UNINSTALL_SHOP_ERROR =
+            new BusinessErrorCode("LW-5002", "Uninstall shop error", 500);
+
     BusinessErrorCode INVALID_HMAC_ERROR =
             new BusinessErrorCode("LW-4001", "Invalid hmac error", 400);
 
