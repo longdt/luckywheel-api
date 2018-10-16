@@ -6,6 +6,7 @@ import com.foxpify.luckywheel.repository.ShopRepository;
 import com.foxpify.luckywheel.service.ShopService;
 import com.foxpify.shopifyapi.util.Futures;
 import com.foxpify.vertxorm.repository.query.Query;
+import com.foxpify.vertxorm.repository.query.QueryFactory;
 import com.github.benmanes.caffeine.cache.AsyncLoadingCache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import io.vertx.core.AsyncResult;
@@ -104,18 +105,16 @@ public class ShopServiceImpl implements ShopService {
 
 
     @Override
-    public Future<Void> removeShop(String shop) {
-        return getShop(shop).otherwise(t -> null)
-                .compose(s -> {
-                    if (s == null) {
-                        return Future.<Void>succeededFuture();
-                    }
-                    s.setDeleted(true);
-                    return shopRepository.save(s).map(sh -> {
-                        tokenByShopCache.synchronous().invalidate(sh.getShop());
-                        tokenByIdCache.synchronous().invalidate(sh.getId());
-                        return (Void) null;
-                    });
+    public Future<Void> removeShop(String shop, String accessToken) {
+        return shopRepository.remove(shop, QueryFactory.equal("access_token", accessToken))
+                .map(shopOpt -> {
+                    clearCache(shopOpt.orElseThrow(() -> new ShopNotFoundException("can't remove shop: " + shop + " with accessToken: " + accessToken)));
+                    return null;
                 });
+    }
+
+    private void clearCache(Shop shop) {
+        tokenByShopCache.synchronous().invalidate(shop.getShop());
+        tokenByIdCache.synchronous().invalidate(shop.getId());
     }
 }

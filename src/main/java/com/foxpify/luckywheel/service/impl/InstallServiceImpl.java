@@ -1,6 +1,8 @@
 package com.foxpify.luckywheel.service.impl;
 
 import com.foxpify.luckywheel.conf.AppConf;
+import com.foxpify.luckywheel.exception.BusinessException;
+import com.foxpify.luckywheel.exception.ErrorCode;
 import com.foxpify.luckywheel.exception.InvalidHmacException;
 import com.foxpify.luckywheel.exception.ShopNotFoundException;
 import com.foxpify.luckywheel.model.entity.Shop;
@@ -8,8 +10,10 @@ import com.foxpify.luckywheel.service.InstallService;
 import com.foxpify.luckywheel.service.ShopService;
 import com.foxpify.luckywheel.util.Constant;
 import com.foxpify.luckywheel.util.ErrorLogHandler;
+import com.foxpify.luckywheel.util.ObjectHolder;
 import com.foxpify.shopifyapi.client.Session;
 import com.foxpify.shopifyapi.client.ShopifyClient;
+import com.foxpify.shopifyapi.exception.ShopifyException;
 import com.foxpify.shopifyapi.model.Asset;
 import com.foxpify.shopifyapi.model.OAuthToken;
 import com.foxpify.shopifyapi.model.Theme;
@@ -91,7 +95,7 @@ public class InstallServiceImpl implements InstallService {
     private void registerWebhooks(String shop, String accessToken) {
         Session session = shopifyClient.newSession(shop, accessToken);
         session.createWebhook(Constant.UNINSTALLED_TOPIC, uninstalledUrl,
-                        new ErrorLogHandler<>(logger, Level.ERROR, "can't create uninstall webhook for shop {}", shop));
+                new ErrorLogHandler<>(logger, Level.ERROR, "can't create uninstall webhook for shop {}", shop));
         session.createWebhook(Constant.PUBLISH_THEMES_TOPIC, setupThemeUrl,
                 new ErrorLogHandler<>(logger, Level.ERROR, "can't create setup theme webhook for shop {}", shop));
     }
@@ -105,7 +109,24 @@ public class InstallServiceImpl implements InstallService {
 
     @Override
     public void uninstall(String shop, Handler<AsyncResult<Void>> resultHandler) {
-        shopService.removeShop(shop).setHandler(resultHandler);
+        ObjectHolder<String> accessTokenHolder = new ObjectHolder<>();
+        shopService.getShop(shop)
+                .compose(s -> {
+                    accessTokenHolder.setValue(s.getAccessToken());
+                    return testAccessToken(s.getShop(), s.getAccessToken());
+                })
+                .recover(t -> {
+                    if (t instanceof ShopNotFoundException) {
+                        return Future.succeededFuture();
+                    } else if (t instanceof ShopifyException) {
+                        return shopService.removeShop(shop, accessTokenHolder.getValue());
+                    }
+                    throw new BusinessException(ErrorCode.UNINSTALL_SHOP_ERROR, "Can't uninstall " + shop, t);
+                }).setHandler(resultHandler);
+    }
+
+    private Future<Void> testAccessToken(String shop, String accessToken) {
+        return shopifyClient.newSession(shop, accessToken).findShop("id").map((Void) null);
     }
 
     @Override

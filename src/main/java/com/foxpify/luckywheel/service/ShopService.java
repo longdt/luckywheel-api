@@ -21,5 +21,5 @@ public interface ShopService {
 
     void nextId(Handler<AsyncResult<Long>> resultHandler);
 
-    Future<Void> removeShop(String shop);
+    Future<Void> removeShop(String shop, String accessTokenCond);
 }

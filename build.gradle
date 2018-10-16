@@ -45,10 +45,10 @@ dependencies {
     compile 'io.vertx:vertx-auth-jwt:3.5.4'
 
 
-    compile ('com.foxpify:shopify-vertx-api:1.1.1-SNAPSHOT' ) {
+    compile ('com.foxpify:shopify-vertx-api:1.1.1' ) {
         exclude group: 'com.dslplatform'
     }
-    compile ('com.foxpify:vertx-orm:1.1.2-SNAPSHOT') {
+    compile ('com.foxpify:vertx-orm:1.1.2') {
         exclude group: 'com.dslplatform'
     }
 
