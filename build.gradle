@@ -43,6 +43,7 @@ dependencies {
     compile 'io.vertx:vertx-config:3.5.4'
     compile 'io.vertx:vertx-config-yaml:3.5.4'
     compile 'io.vertx:vertx-auth-jwt:3.5.4'
+    compile 'io.vertx:vertx-web-templ-rocker:3.5.4'
 
 
     compile ('com.foxpify:shopify-vertx-api:1.1.1' ) {
