@@ -7,7 +7,7 @@ import io.vertx.core.Handler;
 import io.vertx.core.MultiMap;
 
 public interface InstallService {
-    String APP_SCOPES = "read_themes,write_themes,read_price_rules,write_price_rules";
+    String APP_SCOPES = "write_script_tags,write_price_rules";
 
     String install(String shop, String authUrl);
 
