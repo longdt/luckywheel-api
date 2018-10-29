@@ -33,4 +33,7 @@ public interface ErrorCode {
 
     BusinessErrorCode INVALID_DISCOUNT_CODE =
             new BusinessErrorCode("LW-4009", "Invalid discount code", 400);
+
+    BusinessErrorCode OVERLAP_RUNNING_CAMPAIGN =
+            new BusinessErrorCode("LW-4010", "Overlap running campaign", 400);
 }

@@ -31,9 +31,7 @@ import java.time.OffsetDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static com.foxpify.vertxorm.repository.query.QueryFactory.and;
-import static com.foxpify.vertxorm.repository.query.QueryFactory.equal;
-import static com.foxpify.vertxorm.repository.query.QueryFactory.in;
+import static com.foxpify.vertxorm.repository.query.QueryFactory.*;
 
 @Singleton
 public class CampaignServiceImpl implements CampaignService {
@@ -94,7 +92,26 @@ public class CampaignServiceImpl implements CampaignService {
         if (campaign.getStartedAt() == null) {
             campaign.setStartedAt(now);
         }
-        setupSlides(campaign).compose(campaignRepository::insert).setHandler(resultHandler);
+        checkRunningDate(campaign).compose(this::setupSlides).compose(campaignRepository::insert).setHandler(resultHandler);
+    }
+
+    private Future<Campaign> checkRunningDate(Campaign campaign) {
+        if (!campaign.getActive()) {
+            return Future.succeededFuture(campaign);
+        }
+        String start = campaign.getStartedAt().toString();
+        Query<Campaign> query1 = and(lessThanOrEqualTo("started_at", start), raw("active = true"), or(isNull("completed_at"), greaterThan("completed_at", start)));
+        Query<Campaign> query2 = greaterThanOrEqualTo("started_at", start);
+        if (campaign.getCompletedAt() != null) {
+            query2 = and(query2, lessThan("started_at", campaign.getCompletedAt().toString()));
+        }
+        Query<Campaign> query = and(equal("shop_id", campaign.getShopId()), raw("active = true"), or(query1, query2)).limit(1);
+        return campaignRepository.find(query).map(campaignOpt -> {
+            campaignOpt.ifPresent(c -> {
+                throw new BusinessException(ErrorCode.OVERLAP_RUNNING_CAMPAIGN, "overlap running with campaign '" + c.getName() + "'");
+            });
+            return campaign;
+        });
     }
 
     private Future<Campaign> setupSlides(Campaign campaign) {
@@ -140,8 +157,11 @@ public class CampaignServiceImpl implements CampaignService {
         getCampaign(user, campaign.getId()).compose(campaignOpt -> {
             Campaign origin = campaignOpt.orElseThrow(() -> new CampaignNotFoundException("campaign " + campaign.getId() + " is not found"));
             copyNonNull(campaign, origin);
+            if (origin.getStartedAt() != null && origin.getCompletedAt() != null && !origin.getStartedAt().isBefore(origin.getCompletedAt())) {
+                throw new ValidateException(ErrorCode.REQUIRED_PARAMETERS_MISSING_OR_INVALID, "Campaign's startedAt must before completedAt");
+            }
             origin.setUpdatedAt(OffsetDateTime.now());
-            return setupSlides(origin).compose(campaignRepository::update);
+            return checkRunningDate(origin).compose(this::setupSlides).compose(campaignRepository::update);
         }).setHandler(resultHandler);
     }
 
@@ -161,7 +181,7 @@ public class CampaignServiceImpl implements CampaignService {
         getCampaign(user, campaignId).compose(campaignOpt -> {
             Campaign campaign = campaignOpt.orElseThrow(() -> new CampaignNotFoundException("campaign " + campaignId + " is not found"));
             campaign.setActive(active);
-            return campaignRepository.save(campaign);
+            return checkRunningDate(campaign).compose(campaignRepository::update);
         }).setHandler(resultHandler);
     }
 

@@ -1,6 +1,5 @@
 package com.foxpify.luckywheel.service;
 
-import com.foxpify.luckywheel.handler.ResponseHandler;
 import com.foxpify.luckywheel.model.entity.Campaign;
 import com.foxpify.shopifyapi.util.Futures;
 import com.foxpify.vertxorm.repository.query.Query;

@@ -11,11 +11,19 @@ public class ErrorLogHandler<T> implements Handler<AsyncResult<T>> {
     private Consumer<Throwable> logFunc;
 
     public ErrorLogHandler(Logger logger, Level level, String msg, Object... params) {
-        this.logFunc = t -> logger.log(level, msg, params, t);
+        this(t -> logger.log(level, msg, params, t));
     }
 
     public ErrorLogHandler(Consumer<Throwable> logFunc) {
         this.logFunc = logFunc;
+    }
+
+    public ErrorLogHandler(Logger logger) {
+        this(logger::error);
+    }
+
+    public ErrorLogHandler(Logger logger, String msg) {
+        this(logger, Level.ERROR, msg);
     }
 
     @Override

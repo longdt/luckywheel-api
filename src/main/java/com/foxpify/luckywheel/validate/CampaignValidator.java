@@ -21,6 +21,9 @@ public class CampaignValidator implements Validator<Campaign> {
         if (campaign.getSlices() != null) {
             campaign.getSlices().forEach(sliceValidator::validate);
         }
+        if (campaign.getStartedAt() != null && campaign.getCompletedAt() != null && !campaign.getStartedAt().isBefore(campaign.getCompletedAt())) {
+            throw new ValidateException(ErrorCode.REQUIRED_PARAMETERS_MISSING_OR_INVALID, "Campaign's startedAt must before completedAt");
+        }
         return campaign;
     }
 
