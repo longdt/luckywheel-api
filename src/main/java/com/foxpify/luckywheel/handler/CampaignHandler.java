@@ -48,6 +48,21 @@ public class CampaignHandler {
         });
     }
 
+    public void getRunningCampaign(RoutingContext routingContext) {
+        try {
+            String shop = routingContext.request().getParam("shop");
+            campaignService.getRunningCampaign(shop, new ResponseHandler<Optional<Campaign>>(routingContext) {
+
+                @Override
+                public void success(Optional<Campaign> result) throws Throwable {
+                    Responses.ok(routingContext, result.orElseThrow(() -> new CampaignNotFoundException("running campaign of shop: " + shop + " is not found")));
+                }
+            });
+        } catch (Exception e) {
+            throw new ValidateException(ErrorCode.REQUIRED_PARAMETERS_MISSING_OR_INVALID, "require valid shop param", e);
+        }
+    }
+
     public void getCampaign(RoutingContext routingContext) {
         UUID campaignId;
         try {

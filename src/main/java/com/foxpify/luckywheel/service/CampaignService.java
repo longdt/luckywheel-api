@@ -16,6 +16,12 @@ import java.util.Optional;
 import java.util.UUID;
 
 public interface CampaignService {
+    default Future<Optional<Campaign>> getRunningCampaign(String shop) {
+        return Futures.toFuture(this::getRunningCampaign, shop);
+    }
+
+    void getRunningCampaign(String shop, Handler<AsyncResult<Optional<Campaign>>> resultHandler);
+
     default Future<Optional<Campaign>> getCampaign(UUID campaignId) {
         return Futures.toFuture(this::getCampaign, campaignId);
     }

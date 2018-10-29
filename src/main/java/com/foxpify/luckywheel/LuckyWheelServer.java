@@ -87,6 +87,8 @@ public class LuckyWheelServer {
                 .handler(campaignHandler::createCampaign);
         router.get(Constant.ADMIN_SUBROUTE_ENDPOINT + Constant.GET_CAMPAIGNS_ENDPOINT)
                 .handler(campaignHandler::getCampaigns);
+        router.get(Constant.GET_RUNNING_CAMPAIGN_ENDPOINT)
+                .handler(campaignHandler::getRunningCampaign);
         router.get(Constant.ADMIN_SUBROUTE_ENDPOINT + Constant.GET_CAMPAIGN_ENDPOINT)
                 .handler(campaignHandler::getCampaign);
         router.patch(Constant.ADMIN_SUBROUTE_ENDPOINT + Constant.UPDATE_CAMPAIGN_ENDPOINT)

@@ -48,6 +48,19 @@ public class CampaignServiceImpl implements CampaignService {
     }
 
     @Override
+    public void getRunningCampaign(String shop, Handler<AsyncResult<Optional<Campaign>>> resultHandler) {
+        OffsetDateTime now = OffsetDateTime.now();
+        shopService.getShop(shop).compose(s -> {
+            Query<Campaign> query = and(
+                    equal("shop_id", s.getId()),
+                    raw("active = true"),
+                    lessThanOrEqualTo("started_at", now),
+                    or(isNull("completed_at"), greaterThan("completed_at", now)));
+            return campaignRepository.find(query);
+        }).setHandler(resultHandler);
+    }
+
+    @Override
     public void getCampaign(UUID campaignId, Handler<AsyncResult<Optional<Campaign>>> resultHandler) {
         campaignRepository.find(campaignId, resultHandler);
     }
@@ -99,11 +112,11 @@ public class CampaignServiceImpl implements CampaignService {
         if (!campaign.getActive()) {
             return Future.succeededFuture(campaign);
         }
-        String start = campaign.getStartedAt().toString();
+        OffsetDateTime start = campaign.getStartedAt();
         Query<Campaign> query1 = and(lessThanOrEqualTo("started_at", start), raw("active = true"), or(isNull("completed_at"), greaterThan("completed_at", start)));
         Query<Campaign> query2 = greaterThanOrEqualTo("started_at", start);
         if (campaign.getCompletedAt() != null) {
-            query2 = and(query2, lessThan("started_at", campaign.getCompletedAt().toString()));
+            query2 = and(query2, lessThan("started_at", campaign.getCompletedAt()));
         }
         Query<Campaign> query = and(equal("shop_id", campaign.getShopId()), raw("active = true"), or(query1, query2)).limit(1);
         return campaignRepository.find(query).map(campaignOpt -> {

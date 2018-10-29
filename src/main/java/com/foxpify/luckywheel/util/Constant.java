@@ -16,6 +16,7 @@ public class Constant {
     public static final String CREAT_CAMPAIGN_ENDPOINT = "/campaigns";
     public static final String GET_CAMPAIGNS_ENDPOINT = CREAT_CAMPAIGN_ENDPOINT;
     public static final String GET_CAMPAIGN_ENDPOINT = "/campaigns/:campaignId";
+    public static final String GET_RUNNING_CAMPAIGN_ENDPOINT = "/campaigns/:shop";
     public static final String UPDATE_CAMPAIGN_ENDPOINT = GET_CAMPAIGN_ENDPOINT;
     public static final String DELETE_CAMPAIGN_ENDPOINT = GET_CAMPAIGN_ENDPOINT;
     public static final String ACTIVATE_CAMPAIGN_ENDPOINT = "/campaigns/:campaignId/activate";
