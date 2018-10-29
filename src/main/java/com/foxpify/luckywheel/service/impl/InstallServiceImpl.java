@@ -105,7 +105,7 @@ public class InstallServiceImpl implements InstallService {
         Session session = shopifyClient.newSession(shop, accessToken);
         session.createWebhook(Constant.UNINSTALLED_TOPIC, uninstalledUrl,
                 new ErrorLogHandler<>(logger, Level.ERROR, "can't create uninstall webhook for shop {}", shop));
-        session.createScriptTag("onload", wheelJsUrl + "?shop=" + URLEncoder.encode(shop, StandardCharsets.UTF_8),
+        session.createScriptTag("onload", wheelJsUrl,
                 new ErrorLogHandler<>(logger, Level.ERROR, "can't create setup theme webhook for shop {}", shop));
     }
 
