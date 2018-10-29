@@ -28,6 +28,8 @@ import org.apache.logging.log4j.Logger;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.concurrent.CompletableFuture;
 
 @Singleton
@@ -37,13 +39,13 @@ public class InstallServiceImpl implements InstallService {
     private ShopService shopService;
     private JWTAuth jwtAuth;
     private String uninstalledUrl;
-    private String setupThemeUrl;
+    private String wheelJsUrl;
     private final JWTOptions options;
 
     @Inject
     public InstallServiceImpl(AppConf appConf, ShopifyClient shopifyClient, ShopService shopService, JWTAuth jwtAuth) {
         this.uninstalledUrl = appConf.getHttpHost() + appConf.getContextPath() + Constant.UNINSTALL_ENDPOINT;
-        this.setupThemeUrl = appConf.getHttpHost() + appConf.getContextPath() + Constant.SETUP_THEME_ENDPOINT;
+        this.wheelJsUrl = appConf.getWheelJsUrl();
         this.shopifyClient = shopifyClient;
         this.shopService = shopService;
         this.jwtAuth = jwtAuth;
@@ -62,7 +64,7 @@ public class InstallServiceImpl implements InstallService {
                     .map(s -> {
                         updateAccessTokenIfNeed(s, shop, code).map(updatedShop -> {
                             if (updatedShop != null) {
-                                registerWebhooks(shop, updatedShop.getAccessToken());
+                                setupShop(shop, updatedShop.getAccessToken());
                             }
                             return null;
                         });
@@ -77,7 +79,7 @@ public class InstallServiceImpl implements InstallService {
                                 .compose(compositeFuture -> {
                                     Long shopId = compositeFuture.resultAt(0);
                                     OAuthToken authToken = compositeFuture.resultAt(1);
-                                    registerWebhooks(shop, authToken.getAccessToken());
+                                    setupShop(shop, authToken.getAccessToken());
                                     Shop s = new Shop(shop, authToken);
                                     s.setId(shopId);
                                     return shopService.createShop(s);
@@ -99,11 +101,11 @@ public class InstallServiceImpl implements InstallService {
         });
     }
 
-    private void registerWebhooks(String shop, String accessToken) {
+    private void setupShop(String shop, String accessToken) {
         Session session = shopifyClient.newSession(shop, accessToken);
         session.createWebhook(Constant.UNINSTALLED_TOPIC, uninstalledUrl,
                 new ErrorLogHandler<>(logger, Level.ERROR, "can't create uninstall webhook for shop {}", shop));
-        session.createWebhook(Constant.PUBLISH_THEMES_TOPIC, setupThemeUrl,
+        session.createScriptTag("onload", wheelJsUrl + "?shop=" + URLEncoder.encode(shop, StandardCharsets.UTF_8),
                 new ErrorLogHandler<>(logger, Level.ERROR, "can't create setup theme webhook for shop {}", shop));
     }
 

@@ -10,6 +10,8 @@ public class AppConf {
     private String appKey;
     private String appSecret;
     private String adminUrl;
+    @JsonProperty("wheel.js.url")
+    private String wheelJsUrl;
     @JsonProperty("jwt.token.expiresInSeconds")
     private int jwtExpiresInSeconds;
     private JsonObject jsonObject;
@@ -92,5 +94,13 @@ public class AppConf {
 
     public void setAppSecret(String appSecret) {
         this.appSecret = appSecret;
+    }
+
+    public String getWheelJsUrl() {
+        return wheelJsUrl;
+    }
+
+    public void setWheelJsUrl(String wheelJsUrl) {
+        this.wheelJsUrl = wheelJsUrl;
     }
 }
