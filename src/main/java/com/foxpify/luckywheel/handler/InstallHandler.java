@@ -9,6 +9,8 @@ import com.foxpify.luckywheel.util.Responses;
 import com.foxpify.luckywheel.validate.WebhookValidator;
 import io.vertx.ext.web.Cookie;
 import io.vertx.ext.web.RoutingContext;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -16,6 +18,7 @@ import java.util.concurrent.ThreadLocalRandom;
 
 @Singleton
 public class InstallHandler {
+    private static final Logger logger = LogManager.getLogger(InstallHandler.class);
     private InstallService installService;
     private WebhookValidator validator;
     private String authUrl;
@@ -44,20 +47,9 @@ public class InstallHandler {
         validator.validate(routingContext);
         String shop = routingContext.request().getHeader("X-Shopify-Shop-Domain");
         String topic = routingContext.request().getHeader("X-Shopify-Topic");
-        if (Constant.UNINSTALLED_TOPIC.equals(topic)) {
+        if (Constant.UNINSTALLED_TOPIC.equals(topic) || Constant.REDACT_SHOP_TOPIC.equals(topic)) {
+            logger.info("shop {} request {} shop data: {}", shop, topic, routingContext.getBodyAsString());
             installService.uninstall(shop);
-            Responses.ok(routingContext);
-        } else {
-            Responses.badRequest(routingContext);
-        }
-    }
-
-    public void setupTheme(RoutingContext routingContext) {
-        validator.validate(routingContext);
-        String shop = routingContext.request().getHeader("X-Shopify-Shop-Domain");
-        String topic = routingContext.request().getHeader("X-Shopify-Topic");
-        if (Constant.SETUP_THEME_ENDPOINT.equals(topic)) {
-            installService.setupTheme(shop, routingContext.getBodyAsJson().getLong("theme_store_id"));
             Responses.ok(routingContext);
         } else {
             Responses.badRequest(routingContext);
@@ -82,5 +74,21 @@ public class InstallHandler {
                 Responses.redirect(routingContext, adminUrl + "?token=" + result);
             }
         });
+    }
+
+    public void deleteCustomer(RoutingContext routingContext) {
+        validator.validate(routingContext);
+        String shop = routingContext.request().getHeader("X-Shopify-Shop-Domain");
+        String topic = routingContext.request().getHeader("X-Shopify-Topic");
+        logger.info("shop {} request delete customer data: {}", shop, routingContext.getBodyAsString());
+        Responses.ok(routingContext);
+    }
+
+    public void viewCustomer(RoutingContext routingContext) {
+        validator.validate(routingContext);
+        String shop = routingContext.request().getHeader("X-Shopify-Shop-Domain");
+        String topic = routingContext.request().getHeader("X-Shopify-Topic");
+        logger.info("shop {} request view customer data: {}", shop, routingContext.getBodyAsString());
+        Responses.ok(routingContext);
     }
 }

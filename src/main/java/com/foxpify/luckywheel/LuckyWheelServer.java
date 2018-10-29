@@ -79,6 +79,8 @@ public class LuckyWheelServer {
     private void initInstallRouter(Router router, InstallHandler installHandler) {
         router.get(Constant.INSTALL_ENDPOINT).handler(installHandler::install);
         router.post(Constant.UNINSTALL_ENDPOINT).handler(installHandler::uninstall);
+        router.post(Constant.DELETE_CUSTOMER_ENDPOINT).handler(installHandler::deleteCustomer);
+        router.post(Constant.VIEW_CUSTOMER_ENDPOINT).handler(installHandler::viewCustomer);
         router.get(Constant.AUTH_ENDPOINT).handler(installHandler::auth);
     }
 
