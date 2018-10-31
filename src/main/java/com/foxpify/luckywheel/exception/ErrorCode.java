@@ -14,7 +14,7 @@ public interface ErrorCode {
             new BusinessErrorCode("LW-4002", "Required parameters missing or invalid", 400);
 
     BusinessErrorCode SHOP_NOT_FOUND =
-            new BusinessErrorCode("LW-4003", "Shop is not found", 400);
+            new BusinessErrorCode("LW-4003", "Shop is not found", 404);
 
     BusinessErrorCode ORIGIN_CANT_BE_VERIFIED =
             new BusinessErrorCode("LW-4004", "Request origin cannot be verified", 403);
@@ -23,10 +23,10 @@ public interface ErrorCode {
             new BusinessErrorCode("LW-4005", "Unauthorized error", 401);
 
     BusinessErrorCode CAMPAIGN_NOT_FOUND =
-            new BusinessErrorCode("LW-4006", "Campaign is not found", 400);
+            new BusinessErrorCode("LW-4006", "Campaign is not found", 404);
 
     BusinessErrorCode SLICE_NOT_FOUND =
-            new BusinessErrorCode("LW-4007", "Slice is not found", 400);
+            new BusinessErrorCode("LW-4007", "Slice is not found", 404);
 
     BusinessErrorCode SUBSCRIBER_EXISTS_ERROR =
             new BusinessErrorCode("LW-4008", "Subscriber is already exists", 400);
