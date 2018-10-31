@@ -62,7 +62,7 @@ public class SubscriberServiceImpl implements SubscriberService {
         })
                 .compose(slice -> {
                     Future<Subscriber> subscriber = createSubscriber(subscribeRequest, holder.getValue(), slice.getDiscountCode());
-                    if (slice.getPriceRuleId() != null && slice.isAuto()) {
+                    if (slice.getPriceRuleId() != null && slice.getAuto()) {
                         return subscriber.compose(sub -> generateDiscountCode(holder.getValue().getShopId(), slice));
                     }
                     return subscriber.map(slice);

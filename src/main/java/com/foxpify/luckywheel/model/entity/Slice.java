@@ -51,7 +51,7 @@ public class Slice {
         this.probability = probability;
     }
 
-    public boolean isAuto() {
+    public boolean getAuto() {
         return auto;
     }
 
