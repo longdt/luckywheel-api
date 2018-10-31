@@ -118,7 +118,7 @@ public class CampaignServiceImpl implements CampaignService {
         if (campaign.getCompletedAt() != null) {
             query2 = and(query2, lessThan("started_at", campaign.getCompletedAt()));
         }
-        Query<Campaign> query = and(equal("shop_id", campaign.getShopId()), raw("active = true"), or(query1, query2)).limit(1);
+        Query<Campaign> query = and(equal("shop_id", campaign.getShopId()), notEqual("id", campaign.getId().toString()), raw("active = true"), or(query1, query2)).limit(1);
         return campaignRepository.find(query).map(campaignOpt -> {
             campaignOpt.ifPresent(c -> {
                 throw new BusinessException(ErrorCode.OVERLAP_RUNNING_CAMPAIGN, "overlap running with campaign '" + c.getName() + "'");
