@@ -9,7 +9,7 @@ public class Slice {
     private String discountCode;
     private Long priceRuleId;
     private Float probability;
-    private boolean auto;
+    private Boolean auto;
 
     public Integer getIndex() {
         return index;
@@ -51,11 +51,11 @@ public class Slice {
         this.probability = probability;
     }
 
-    public boolean getAuto() {
+    public Boolean getAuto() {
         return auto;
     }
 
-    public void setAuto(boolean auto) {
+    public void setAuto(Boolean auto) {
         this.auto = auto;
     }
 }
