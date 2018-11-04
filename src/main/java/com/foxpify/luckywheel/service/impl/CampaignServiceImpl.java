@@ -4,7 +4,6 @@ import com.foxpify.luckywheel.exception.BusinessException;
 import com.foxpify.luckywheel.exception.CampaignNotFoundException;
 import com.foxpify.luckywheel.exception.ErrorCode;
 import com.foxpify.luckywheel.exception.ValidateException;
-import com.foxpify.luckywheel.handler.ResponseHandler;
 import com.foxpify.luckywheel.model.entity.Campaign;
 import com.foxpify.luckywheel.model.entity.Slice;
 import com.foxpify.luckywheel.repository.CampaignRepository;
@@ -14,9 +13,12 @@ import com.foxpify.luckywheel.util.Model;
 import com.foxpify.shopifyapi.client.ShopifyClient;
 import com.foxpify.shopifyapi.exception.ShopifyException;
 import com.foxpify.shopifyapi.model.DiscountCode;
+import com.foxpify.shopifyapi.util.Futures;
 import com.foxpify.vertxorm.repository.query.Query;
 import com.foxpify.vertxorm.util.Page;
 import com.foxpify.vertxorm.util.PageRequest;
+import com.github.benmanes.caffeine.cache.AsyncLoadingCache;
+import com.github.benmanes.caffeine.cache.Caffeine;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.CompositeFuture;
 import io.vertx.core.Future;
@@ -29,6 +31,9 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.time.OffsetDateTime;
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
 import static com.foxpify.vertxorm.repository.query.QueryFactory.*;
@@ -39,25 +44,60 @@ public class CampaignServiceImpl implements CampaignService {
     private CampaignRepository campaignRepository;
     private ShopService shopService;
     private ShopifyClient shopifyClient;
+    private AsyncLoadingCache<String, Campaign> runningCache;
 
     @Inject
     public CampaignServiceImpl(CampaignRepository campaignRepository, ShopService shopService, ShopifyClient shopifyClient) {
         this.campaignRepository = campaignRepository;
         this.shopService = shopService;
         this.shopifyClient = shopifyClient;
+        runningCache = Caffeine.newBuilder()
+                .maximumSize(10_000)
+                .expireAfterAccess(10, TimeUnit.HOURS)
+                .buildAsync((shop, executor) -> Futures.toCompletableFuture(findRunningCampaign(shop, OffsetDateTime.now())));
     }
 
-    @Override
-    public void getRunningCampaign(String shop, Handler<AsyncResult<Optional<Campaign>>> resultHandler) {
-        OffsetDateTime now = OffsetDateTime.now();
-        shopService.getShop(shop).compose(s -> {
+    private Future<Campaign> findRunningCampaign(String shop, OffsetDateTime dateTime) {
+        return shopService.getShop(shop).compose(s -> {
             Query<Campaign> query = and(
                     equal("shop_id", s.getId()),
                     raw("active = true"),
-                    lessThanOrEqualTo("started_at", now),
-                    or(isNull("completed_at"), greaterThan("completed_at", now)));
+                    lessThanOrEqualTo("started_at", dateTime),
+                    or(isNull("completed_at"), greaterThan("completed_at", dateTime)));
             return campaignRepository.find(query);
-        }).setHandler(resultHandler);
+        }).map(campaignOpt -> campaignOpt.orElseThrow(() -> new CampaignNotFoundException("running campaign of shop: " + shop + " is not found")));
+    }
+
+    private boolean isRunning(Campaign campaign, OffsetDateTime now) {
+        if (now.isBefore(campaign.getStartedAt())) {
+            return false;
+        } else if (campaign.getCompletedAt() == null) {
+            return true;
+        }
+        return now.isBefore(campaign.getCompletedAt());
+    }
+
+    @Override
+    public void getRunningCampaign(String shop, Handler<AsyncResult<Campaign>> resultHandler) {
+        OffsetDateTime now = OffsetDateTime.now();
+        AtomicBoolean newload = new AtomicBoolean();
+        runningCache.get(shop, (key, executor) -> {
+                    newload.set(true);
+                    return Futures.toCompletableFuture(findRunningCampaign(key, now));
+                })
+                .thenCompose(campaign -> {
+                    if (newload.get() || isRunning(campaign, now)) {
+                        return CompletableFuture.completedFuture(campaign);
+                    }
+                    runningCache.synchronous().invalidate(shop);
+                    return runningCache.get(shop, (key, executor) -> Futures.toCompletableFuture(findRunningCampaign(key, now)));
+                }).whenComplete((c, t) -> {
+                    if (t != null) {
+                        resultHandler.handle(Future.failedFuture(t));
+                    } else {
+                        resultHandler.handle(Future.succeededFuture(c));
+                    }
+                });
     }
 
     @Override
@@ -105,7 +145,7 @@ public class CampaignServiceImpl implements CampaignService {
         if (campaign.getStartedAt() == null) {
             campaign.setStartedAt(now);
         }
-        checkRunningDate(campaign).compose(this::setupSlides).compose(campaignRepository::insert).setHandler(resultHandler);
+        setupSlides(campaign).compose(this::checkRunningDate).compose(campaignRepository::insert).setHandler(resultHandler);
     }
 
     private Future<Campaign> checkRunningDate(Campaign campaign) {
@@ -174,8 +214,8 @@ public class CampaignServiceImpl implements CampaignService {
                 throw new ValidateException(ErrorCode.REQUIRED_PARAMETERS_MISSING_OR_INVALID, "Campaign's startedAt must before completedAt");
             }
             origin.setUpdatedAt(OffsetDateTime.now());
-            return checkRunningDate(origin).compose(this::setupSlides).compose(campaignRepository::update);
-        }).setHandler(resultHandler);
+            return setupSlides(origin).compose(this::checkRunningDate).compose(campaignRepository::update);
+        }).map(c -> clearCache(user, c)).setHandler(resultHandler);
     }
 
     private void copyNonNull(Campaign src, Campaign dest) {
@@ -195,7 +235,7 @@ public class CampaignServiceImpl implements CampaignService {
             Campaign campaign = campaignOpt.orElseThrow(() -> new CampaignNotFoundException("campaign " + campaignId + " is not found"));
             campaign.setActive(active);
             return checkRunningDate(campaign).compose(campaignRepository::update);
-        }).setHandler(resultHandler);
+        }).map(c -> clearCache(user, c)).setHandler(resultHandler);
     }
 
     @Override
@@ -203,7 +243,12 @@ public class CampaignServiceImpl implements CampaignService {
         getCampaign(user, campaignId).compose(campaignOpt -> {
             campaignOpt.orElseThrow(() -> new CampaignNotFoundException("campaign " + campaignId + " is not found"));
             return campaignRepository.delete(campaignId);
-        }).setHandler(resultHandler);
+        }).map(v -> clearCache(user, v)).setHandler(resultHandler);
+    }
+
+    private <T> T clearCache(User user, T value) {
+        runningCache.synchronous().invalidate(user.principal().getString("shop"));
+        return value;
     }
 
 }

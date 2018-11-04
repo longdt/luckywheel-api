@@ -39,7 +39,7 @@ public class CampaignHandler {
             throw new ValidateException(ErrorCode.REQUIRED_PARAMETERS_MISSING_OR_INVALID, "require campaign json object", e);
         }
         validator.validate(campaign);
-        campaignService.createCampaign(routingContext.user(), campaign, new ResponseHandler<Campaign>(routingContext) {
+        campaignService.createCampaign(routingContext.user(), campaign, new ResponseHandler<>(routingContext) {
 
             @Override
             public void success(Campaign result) throws Throwable {
@@ -51,11 +51,11 @@ public class CampaignHandler {
     public void getRunningCampaign(RoutingContext routingContext) {
         try {
             String shop = routingContext.request().getParam("shop");
-            campaignService.getRunningCampaign(shop, new ResponseHandler<Optional<Campaign>>(routingContext) {
+            campaignService.getRunningCampaign(shop, new ResponseHandler<>(routingContext) {
 
                 @Override
-                public void success(Optional<Campaign> result) throws Throwable {
-                    Responses.ok(routingContext, result.orElseThrow(() -> new CampaignNotFoundException("running campaign of shop: " + shop + " is not found")));
+                public void success(Campaign result) throws Throwable {
+                    Responses.ok(routingContext, result);
                 }
             });
         } catch (Exception e) {
@@ -159,7 +159,7 @@ public class CampaignHandler {
         } catch (Exception e) {
             throw new ValidateException(ErrorCode.REQUIRED_PARAMETERS_MISSING_OR_INVALID, "require valid campaignId param", e);
         }
-        campaignService.deleteCampaign(routingContext.user(), campaignId, new ResponseHandler<Void>(routingContext) {
+        campaignService.deleteCampaign(routingContext.user(), campaignId, new ResponseHandler<>(routingContext) {
 
             @Override
             public void success(Void result) throws Throwable {
