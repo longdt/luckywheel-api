@@ -1,4 +1,4 @@
-contextPath: /luckywheel
+contextPath: /api
 httpPort: 8080
 httpHost: https://dev.foxpify.com:50001
 appKey: 6c1a338b2a7047c9771aa2a3d19ed587
@@ -9,11 +9,11 @@ jwt.auth.options:
     path: conf/keystore.jceks
     password: ETP7nZoLTXLQxZUrgBgrHOpA+cYRLHcQ2tPGWwvd0eo=
 jwt.token.expiresInSeconds: 86400
-adminUrl: https://hoant.foxpify.com/#/authentication
+adminUrl: https://lucky-wheel.foxpify.com/admin/#/authentication
 datasource:
   host: postgres.db.foxpify.com
   port: 5432
   database: luckywheel
   username: foxpify
   password: ntIVEnDOwLsT
-wheel.js.url: https://ngocdon0127.github.io/foxpify/foxpify.js
+wheel.js.url: https://lucky-wheel.foxpify.com/ui/foxpify.js
