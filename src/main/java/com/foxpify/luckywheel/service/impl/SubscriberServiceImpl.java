@@ -24,6 +24,7 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.time.OffsetDateTime;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 
@@ -102,12 +103,34 @@ public class SubscriberServiceImpl implements SubscriberService {
         return subscriberRepository.save(subscriber);
     }
 
+    private Float calculateWinProb(Campaign campaign) {
+        if (campaign.getWinProbability() != null) {
+            return campaign.getWinProbability();
+        }
+        List<Slice> slices = campaign.getSlices();
+        boolean populationPercent = slices.stream().map(Slice::getProbability).anyMatch(Objects::isNull);
+        if (populationPercent) {
+            long luckySlicesNum = slices.stream().filter(s -> s.getDiscountCode() != null).count();
+            return luckySlicesNum / (float) slices.size();
+        }
+        float totalScore = 0;
+        float luckyScore = 0;
+        for (Slice s : slices) {
+            if (s.getDiscountCode() != null) {
+                luckyScore += s.getProbability();
+            }
+            totalScore += s.getProbability();
+        }
+        return luckyScore / totalScore;
+    }
+
     private Slice spinWheel(Campaign campaign) {
         List<Slice> slices = campaign.getSlices();
         ThreadLocalRandom random = ThreadLocalRandom.current();
-        if (campaign.getWinProbability() == null) {
+        Float winProb = calculateWinProb(campaign);
+        if (winProb == null) {
             return slices.get(random.nextInt(slices.size()));
-        } else if (random.nextFloat() >= campaign.getWinProbability()) {
+        } else if (random.nextFloat() >= winProb) {
             List<Slice> badSlices = slices.stream().filter(s -> s.getDiscountCode() == null).collect(Collectors.toList());
             if (!badSlices.isEmpty()) {
                 return badSlices.get(random.nextInt(badSlices.size()));

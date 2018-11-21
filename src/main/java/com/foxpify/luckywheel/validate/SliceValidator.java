@@ -17,11 +17,12 @@ public class SliceValidator implements Validator<Slice> {
     @Override
     public Slice validate(Slice slice) throws ValidateException {
         requireNonEmpty(slice.getLabel(), () -> new ValidateException(ErrorCode.REQUIRED_PARAMETERS_MISSING_OR_INVALID, "Missing slice name"));
-        if (slice.getDiscountCode() != null && !slice.getDiscountCode().isEmpty()) {
-            Float prob = slice.getProbability();
-            if (prob == null || prob < 0 || prob >= 1) {
-                throw new ValidateException(ErrorCode.REQUIRED_PARAMETERS_MISSING_OR_INVALID, "Slice: " + slice.getLabel() + " must has prize probability in range [0, 1)");
-            }
+        Float prob = slice.getProbability();
+        if (slice.getDiscountCode() != null && !slice.getDiscountCode().isEmpty() && prob == null) {
+            throw new ValidateException(ErrorCode.REQUIRED_PARAMETERS_MISSING_OR_INVALID, "Slice: " + slice.getLabel() + " must has prize probability in range [0, 1]");
+        }
+        if (prob != null && (prob < 0 || prob > 1)) {
+            throw new ValidateException(ErrorCode.REQUIRED_PARAMETERS_MISSING_OR_INVALID, "Slice: " + slice.getLabel() + " must has probability in range [0, 1]");
         }
         return slice;
     }
